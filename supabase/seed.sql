@@ -53,7 +53,7 @@ values (
     '#06b6d4',
     '📋'
   );
--- Seed Mock Employees (Not linked to real users yet)
+-- Seed Mock Employees
 insert into employees (
     name,
     email,
@@ -63,26 +63,38 @@ insert into employees (
     working_hours
   )
 values (
-    'Jana Krásna',
-    'jana@bookflow.sk',
-    '+421 900 111 111',
-    '#f59e0b',
+    'Alena Smith',
+    'alena@bookflow.sk',
+    '+421 901 111 111',
+    '#ec4899',
     (
       select jsonb_agg(id)
       from services
-      where name in ('Strih vlasov', 'Farbenie vlasov')
+      where name in ('Strih vlasov', 'Farbenie vlasov', 'Manikúra')
     ),
-    '{"monday": {"start": "09:00", "end": "17:00"}, "tuesday": {"start": "09:00", "end": "17:00"}, "wednesday": {"start": "09:00", "end": "17:00"}, "thursday": {"start": "09:00", "end": "17:00"}, "friday": {"start": "09:00", "end": "15:00"}}'::jsonb
+    '{"monday": {"start": "09:00", "end": "17:00"}, "tuesday": {"start": "09:00", "end": "17:00"}, "wednesday": {"start": "09:00", "end": "17:00"}, "thursday": {"start": "09:00", "end": "17:00"}, "friday": {"start": "09:00", "end": "17:00"}}'::jsonb
   ),
   (
-    'Peter Šikovný',
-    'peter@bookflow.sk',
-    '+421 900 222 222',
+    'Michal Kováč',
+    'michal@bookflow.sk',
+    '+421 901 222 222',
     '#3b82f6',
     (
       select jsonb_agg(id)
       from services
-      where name in ('Strih vlasov', 'Manikúra', 'Masáž')
+      where name in ('Strih vlasov', 'Masáž')
     ),
-    '{"monday": {"start": "10:00", "end": "18:00"}, "tuesday": {"start": "10:00", "end": "18:00"}, "wednesday": {"start": "10:00", "end": "18:00"}, "thursday": {"start": "10:00", "end": "18:00"}, "friday": {"start": "10:00", "end": "18:00"}, "saturday": {"start": "09:00", "end": "13:00"}}'::jsonb
+    '{"monday": {"start": "08:00", "end": "16:00"}, "tuesday": {"start": "08:00", "end": "16:00"}, "wednesday": {"start": "08:00", "end": "16:00"}, "thursday": {"start": "08:00", "end": "16:00"}, "friday": {"start": "08:00", "end": "16:00"}}'::jsonb
+  ),
+  (
+    'Peter Horváth',
+    'peter@bookflow.sk',
+    '+421 901 333 333',
+    '#10b981',
+    (
+      select jsonb_agg(id)
+      from services
+      where name in ('Manikúra', 'Masáž', 'Konzultácia')
+    ),
+    '{"monday": {"start": "10:00", "end": "18:00"}, "tuesday": {"start": "10:00", "end": "18:00"}, "wednesday": {"start": "10:00", "end": "18:00"}, "thursday": {"start": "10:00", "end": "18:00"}, "friday": {"start": "10:00", "end": "18:00"}}'::jsonb
   );

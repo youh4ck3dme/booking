@@ -1,0 +1,25 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "bookflow/booking-widget",
+    "version": "1.0.0",
+    "title": "BookFlow Booking Widget",
+    "category": "widgets",
+    "icon": "calendar-alt",
+    "attributes": {
+        "theme": {
+            "type": "string",
+            "default": "auto"
+        },
+        "primaryColor": {
+            "type": "string",
+            "default": "#3B82F6"
+        },
+        "preselectedService": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "editorScript": "file:./edit.js",
+    "style": "file:./style.css"
+}

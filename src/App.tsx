@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Header } from "./components/layout/Header";
+import { Sidebar } from "./components/layout/Sidebar";
 import { BottomNav } from "./components/layout/BottomNav";
 import { ToastContainer } from "./components/ui/Toast";
 import { OfflineBanner } from "./components/pwa/OfflineBanner";
@@ -24,6 +25,26 @@ const Dashboard = React.lazy(() =>
 const MyBookings = React.lazy(() =>
   import("./pages/MyBookings").then((module) => ({
     default: module.MyBookings,
+  }))
+);
+const Profile = React.lazy(() =>
+  import("./pages/Profile").then((module) => ({
+    default: module.Profile,
+  }))
+);
+const StaffManagement = React.lazy(() =>
+  import("./pages/StaffManagement").then((module) => ({
+    default: module.StaffManagement,
+  }))
+);
+const Settings = React.lazy(() =>
+  import("./pages/Settings").then((module) => ({
+    default: module.Settings,
+  }))
+);
+const Statistics = React.lazy(() =>
+  import("./pages/Statistics").then((module) => ({
+    default: module.Statistics,
   }))
 );
 
@@ -74,6 +95,38 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/staff"
+                element={
+                  <ProtectedRoute>
+                    <StaffManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/statistics"
+                element={
+                  <ProtectedRoute>
+                    <Statistics />
+                  </ProtectedRoute>
+                }
+              />
 
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
@@ -81,6 +134,7 @@ function App() {
         </main>
         <BottomNav />
         <ChatWidget />
+        <Sidebar />
         <ToastContainer />
         <OfflineBanner />
         <InstallPrompt />

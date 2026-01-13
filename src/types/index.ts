@@ -22,7 +22,18 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-// Booking Types
+// Location Types
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  businessHours: WorkingHours;
+  coordinates?: { lat: number; lng: number };
+}
+
+// ... existing types ...
 export interface Service {
   id: string;
   name: string;
@@ -32,6 +43,7 @@ export interface Service {
   category: string;
   color: string;
   icon?: string;
+  locationId?: string;
 }
 
 export interface Employee {
@@ -43,6 +55,7 @@ export interface Employee {
   services: string[]; // service IDs
   workingHours: WorkingHours;
   color: string;
+  locationId?: string;
 }
 
 export interface WorkingHours {
@@ -68,6 +81,7 @@ export interface Booking {
   employeeName: string;
   serviceId: string;
   serviceName: string;
+  locationId: string;
   date: Date;
   startTime: string;
   endTime: string;
@@ -83,6 +97,8 @@ export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' 
 
 // Booking Form Types
 export interface BookingFormData {
+  locationId: string;
+  locationName?: string;
   serviceId: string;
   employeeId?: string;
   date: Date | null;

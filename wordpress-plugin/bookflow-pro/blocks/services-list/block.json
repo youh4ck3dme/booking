@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "bookflow/services-list",
+    "version": "1.0.0",
+    "title": "BookFlow Services List",
+    "category": "widgets",
+    "icon": "list-view",
+    "attributes": {
+        "columns": {
+            "type": "string",
+            "default": "3"
+        },
+        "category": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "editorScript": "file:./edit.js",
+    "style": "file:./style.css"
+}

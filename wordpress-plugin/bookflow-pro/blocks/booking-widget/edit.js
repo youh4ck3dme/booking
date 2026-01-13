@@ -1,0 +1,1 @@
+(function (wp) { wp.blocks.registerBlockType('bookflow/booking-widget', { edit: () => wp.element.createElement('div', { style: { padding: '20px', background: '#f0f0f0', textAlign: 'center' } }, 'BookFlow Booking Widget'), save: () => null }); })(window.wp);

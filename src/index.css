@@ -584,6 +584,14 @@ a:hover {
   gap: var(--space-lg);
 }
 
+.gap-xl {
+  gap: var(--space-xl);
+}
+
+.gap-2xl {
+  gap: var(--space-2xl);
+}
+
 /* Spacing Utilities */
 .p-sm {
   padding: var(--space-sm);
@@ -601,6 +609,10 @@ a:hover {
   padding: var(--space-xl);
 }
 
+.p-2xl {
+  padding: var(--space-2xl);
+}
+
 .mt-sm {
   margin-top: var(--space-sm);
 }
@@ -613,6 +625,14 @@ a:hover {
   margin-top: var(--space-lg);
 }
 
+.mt-xl {
+  margin-top: var(--space-xl);
+}
+
+.mt-2xl {
+  margin-top: var(--space-2xl);
+}
+
 .mb-sm {
   margin-bottom: var(--space-sm);
 }
@@ -623,6 +643,14 @@ a:hover {
 
 .mb-lg {
   margin-bottom: var(--space-lg);
+}
+
+.mb-xl {
+  margin-bottom: var(--space-xl);
+}
+
+.mb-2xl {
+  margin-bottom: var(--space-2xl);
 }
 
 /* Text Utilities */
@@ -659,6 +687,10 @@ a:hover {
 }
 
 /* Visibility */
+.hidden {
+  display: none !important;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -668,6 +700,22 @@ a:hover {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+/* Responsive Utilities */
+@media (min-width: 640px) {
+  .sm\:block {
+    display: block !important;
+  }
+  .sm\:inline {
+    display: inline !important;
+  }
+  .sm\:flex {
+    display: flex !important;
+  }
+  .sm\:hidden {
+    display: none !important;
+  }
 }
 
 /* Animations */
@@ -894,17 +942,11 @@ a:hover {
 
 @media (max-width: 1023px) {
   .app-header .container {
-    display: flex;
-    justify-content: center;
-    position: relative;
-    min-height: 40px;
+    padding: 0 var(--space-md);
   }
 
-  .app-header .flex.items-center.gap-sm {
-    position: absolute;
-    right: var(--space-lg);
-    top: 50%;
-    transform: translateY(-50%);
+  .app-header .text-xl {
+    font-size: var(--text-lg);
   }
 }
 
@@ -1042,4 +1084,47 @@ a:hover {
 
 .h-full {
   height: 100%;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .bottom-nav,
+  header,
+  .chatbot-widget,
+  .btn,
+  .quick-actions,
+  button {
+    display: none !important;
+  }
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .glass-card {
+    background: white !important;
+    border: 1px solid #eee !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    color: black !important;
+  }
+  h1,
+  h2,
+  h3 {
+    color: black !important;
+  }
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  th,
+  td {
+    border: 1px solid #eee !important;
+    padding: 8px !important;
+    color: black !important;
+  }
 }

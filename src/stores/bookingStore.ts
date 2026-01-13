@@ -16,6 +16,7 @@ interface BookingUIState {
 }
 
 const initialFormData: BookingFormData = {
+    locationId: '',
     serviceId: '',
     employeeId: undefined,
     date: null,

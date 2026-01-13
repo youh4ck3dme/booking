@@ -6,6 +6,8 @@ const responses = {
     greeting: ['Ahoj!', 'Dobrý deň!', 'Zdravím vás!'],
     booking: ['Rád vám pomôžem s rezerváciou. Akú službu hľadáte?', 'Samozrejme, poďme na to. Máte záujem o strih, farbenie alebo niečo iné?'],
     pricing: ['Ceny našich služieb začínajú od 15€ za pánsky strih a 25€ za dámsky.'],
+    reschedule: ['Prajete si zmeniť svoj termín? Môžete tak urobiť v sekcii "Moje rezervácie".'],
+    info: ['Svoj najbližší termín nájdete vo svojom profile alebo v sekcii "Moje rezervácie".'],
     unknown: ['Prepáčte, nerozumel som. Môžete to skúsiť inak?', 'Nie som si istý, či rozumiem. Chcete vytvoriť rezerváciu?'],
 };
 
@@ -40,6 +42,22 @@ export const processAIResponse = async (text: string): Promise<AIResponse> => {
     // Pricing Intent
     if (lowerText.includes('cena') || lowerText.includes('kolko') || lowerText.includes('cennik')) {
         return { content: responses.pricing[0] };
+    }
+
+    // Reschedule Intent
+    if (lowerText.includes('zmeni') || lowerText.includes('presun')) {
+        return {
+            content: responses.reschedule[0],
+            actions: [{ type: 'reschedule', label: 'Moje rezervácie' }]
+        };
+    }
+
+    // Info Intent
+    if (lowerText.includes('kedy') || lowerText.includes('mam') || lowerText.includes('info')) {
+        return {
+            content: responses.info[0],
+            actions: [{ type: 'info', label: 'Zobraziť profil' }]
+        };
     }
 
     // Unknown

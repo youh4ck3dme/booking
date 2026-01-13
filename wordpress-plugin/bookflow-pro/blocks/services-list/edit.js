@@ -1,0 +1,1 @@
+(function (wp) { wp.blocks.registerBlockType('bookflow/services-list', { edit: () => wp.element.createElement('div', { style: { padding: '20px', background: '#e0e0e0', textAlign: 'center' } }, 'BookFlow Services List'), save: () => null }); })(window.wp);

@@ -1,158 +1,141 @@
-# 🚀 BookFlow Pro - Enterprise Booking System PWA
+# 💎 BookFlow Pro
 
-> **Moderný, nadčasový rezervačný systém pre firmy budúcnosti.**
-> Postavený na technológiách React 19, TypeScript, Vite a PWA.
+> **The Ultimate Luxury Booking Experience.**
 
-![BookFlow Pro Banner](https://placehold.co/1200x400/0f0f23/6366f1?text=BookFlow+Pro)
+![BookFlow Banner](/public/pwa-512x512.png)
+_(Note: Replace with actual banner if available, using icon for now)_
 
-## 📋 Prehľad projektu
-
-**BookFlow Pro** je progresívna webová aplikácia (PWA) navrhnutá pre maximálnu rýchlosť, offline dostupnosť a prémiový užívateľský zážitok.
-
-### 🌟 Kľúčové Vlastnosti
-
-- **📱 PWA First:** Inštalovateľná aplikácia, funguje offline, push notifikácie.
-- **🎨 Premium Dizajn:** Glassmorphism, plynulé animácie, dark/light mode.
-- **🤖 AI Chatbot:** Integrovaný asistent pre rezervácie v prirodzenom jazyku.
-- **⚡ Superrýchla:** Postavená na Vite a optimalizovaná pre Core Web Vitals.
-- **📊 Smart Dashboard:** Real-time analytika a správa rezervácií.
+**BookFlow Pro** is not just a scheduling tool; it's a statement. Designed for high-end businesses that demand excellence, it combines seamless functionality with a breathtaking, glass-morphic aesthetic. Elevate your client interactions with an intelligent, AI-powered PWA that works beautifully on every device.
 
 ---
 
-## 🚀 Rýchly Štart
+## ✨ Features that Dazzle
 
-### Prerekvizity
+### 🚀 **Next-Gen Performance (PWA)**
 
-- Node.js (LTS verzia)
-- pnpm (`npm install -g pnpm`)
+- **Installable App**: Works natively on iOS and Android.
+- **Offline Capable**: Never lose data, even without signal.
+- **Bouncy Animations**: Every interaction feels alive with premium physics-based motion.
 
-### Inštalácia & Spustenie
+### 🤖 **Intelligent Assistant**
 
-1. **Inštalácia závislostí:**
+- **AI Chatbot**: 24/7 personal concierge for your clients. Handles FAQs and bookings instantly.
+- **Smart Navigation**: Context-aware headers that know if you are a User or Admin.
+
+### 🎨 **Luxury Glass-morphic Design**
+
+- **Adaptive Theme**: Stunning Dark & Light modes.
+- **Premium UI**: Frosted glass effects, vibrant gradients, and metallic accents.
+- **3D Interactive Elements**: Because flat design is so 2020.
+
+### 🛡️ **Enterprise-Grade Security**
+
+- **Supabase Auth**: Bank-level security for user data.
+- **Role-Based Access**: Specialized dashboards for Admins and streamlined flows for Customers.
+- **Privacy First**: Secure booking history and profile management.
+
+---
+
+## 🛠️ Technology Stack
+
+Built with the modern web's most powerful tools:
+
+| Category       | Technology                              |
+| -------------- | --------------------------------------- |
+| **Core**       | React 19, TypeScript, Vite              |
+| **State**      | Zustand (Global), React Query (Server)  |
+| **Styling**    | TailwindCSS, Framer Motion (Animations) |
+| **Icons**      | Lucide React, Custom 3D Assets          |
+| **Backend**    | Supabase (PostgreSQL, Auth, Realtime)   |
+| **Testing**    | Vitest, Playwright (E2E)                |
+| **Deployment** | Vercel / Netlify                        |
+
+---
+
+## 📸 Snapshots
+
+_Imagine screenshots of:_
+
+1. **The Bouncy Sidebar**: A masterpiece of interactive design.
+2. **AI Concierge**: Smart, helpful, and integrated.
+3. **Admin Dashboard**: Analytics that look like art.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm (`npm i -g pnpm`)
+- A taste for quality software
+
+### Installation
+
+1. **Clone & Install**
 
    ```bash
+   git clone https://github.com/yourusername/bookflow-pro.git
+   cd bookflow-pro
    pnpm install
    ```
 
-2. **Spustenie vývojového servera:**
+2. **Environment Setup**
+   Create a `.env` file based on `.env.example`:
 
+   ```env
+   VITE_SUPABASE_URL=your_project_url
+   VITE_SUPABASE_ANON_KEY=your_anon_key
+   ```
+
+3. **Ignition**
    ```bash
    pnpm dev
    ```
-
-   Aplikácia beží na `http://localhost:5173/`
-
-3. **Spustenie testov:**
-
-   ```bash
-   pnpm test:ui  # Otvorí Vitest UI
-   pnpm test     # Spustí testy v konzole
-   ```
-
-### 🔐 Demo Účty
-
-Pre testovanie funkcionality použite tieto predpripravené účty:
-
-| Rola            | Email                    | Heslo      | Popis                                   |
-| :-------------- | :----------------------- | :--------- | :-------------------------------------- |
-| **Admin**       | `admin@bookflow.sk`      | `admin123` | Plný prístup k nastaveniam a dashboardu |
-| **Zamestnanec** | `employee@bookflow.sk`   | `emp123`   | Správa vlastného kalendára              |
-| **Zákazník**    | `customer@example.com`   | `cust123`  | Vytváranie a prehľad rezervácií         |
+   Visit `http://localhost:5173` and enjoy the view.
 
 ---
 
-## 🏗️ Technická Architektúra
+## 🧪 Testing Scope
 
-### Stack
+We don't hope it works; we prove it.
 
-- **Frontend:** React 19, TypeScript
-- **Build Tool:** Vite
-- **State Management:** Zustand (s persistenciou)
-- **Data Fetching:** TanStack Query
-- **Styling:** CSS Variables, Glassmorphism design system
-- **Animations:** Framer Motion
-- **PWA:** Vite PWA Plugin, Workbox
-- **Testing:** Vitest, React Testing Library
+- **Unit Tests**: `pnpm test`
+- **End-to-End**: `pnpm test:e2e`
 
-### Štruktúra Priečinkov
+---
+
+## 🌍 Deployment
+
+Ready for the world?
 
 ```bash
-src/
-├── components/     # UI a funkčné komponenty
-│   ├── ui/         # Základné stavebné bloky (Button, Input, Card...)
-│   ├── layout/     # Header, Footer, Sidebar
-│   ├── booking/    # Komponenty rezervačného procesu
-│   ├── chat/       # AI Chatbot widget
-│   └── dashboard/  # Admin a employee dashboardy
-├── pages/          # Hlavné stránky (Home, Login, Book...)
-├── stores/         # Zustand stores (auth, booking, ui)
-├── hooks/          # Custom React hooks
-├── services/       # API služby a logika
-├── types/          # TypeScript definície
-└── utils/          # Pomocné funkcie
+pnpm build
+vercel --prod
 ```
 
----
-
-## 📚 Dokumentácia
-
-### 1. Booking Flow
-
-Proces rezervácie je rozdelený do krokov:
-
-1. **Výber služby:** Zoznam dostupných služieb s cenami a trvaním.
-2. **Výber zamestnanca:** (Voliteľné) Preferovaný špecialista.
-3. **Výber termínu:** Interaktívny kalendár s voľnými slotmi.
-4. **Zhrnutie & Potvrdenie:** Kontrola údajov a odoslanie.
-
-### 2. AI Chatbot (Coming Soon)
-
-Chatbot využíva OpenAI API na:
-
-- Analýzu požiadavky ("Chcem sa ostrihať zajtra o 14:00")
-- Kontrolu dostupnosti
-- Vytvorenie rezervácie cez konverzáciu
-
-### 3. PWA Schopnosti
-
-- **Service Worker:** Cachovanie assetov a API requestov.
-- **Manifest:** Definícia ikon, farieb a správania "Add to Home Screen".
-- **Offline Mode:** Fallback UI pri strate spojenia.
+It's that simple.
 
 ---
 
-## 🧪 Testovacia Stratégia
+## 🤝 Contribution
 
-Projekt kladie dôraz na kvalitu kódu. Plánujeme implementovať **120+ testov** v nasledujúcich kategóriách:
+We welcome artisans of code.
 
-### Unit Testy (40+)
-
-- Testovanie úžitkových funkcií (date formatting, calculations).
-- Validácia logiky Zustand stores.
-- Testovanie validátorov formulárov.
-
-### Component Testy (40+)
-
-- Renderovanie UI komponentov v rôznych stavoch (loading, error, success).
-- Interakcie (kliky, input events).
-- Prístupnosť (a11y).
-
-### Integration Testy (40+)
-
-- Celý proces rezervácie (E2E flow).
-- Prihlásenie a presmerovanie.
-- PWA cyklus (offline/online).
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
 
 ---
 
-## 🛠️ Vývojový Plán
+## 📜 License
 
-- [x] **Fáza 1:** Setup projektu, Dizajn systém, Auth.
-- [ ] **Fáza 2:** Booking Flow (Kalendár, Slot picker).
-- [ ] **Fáza 3:** AI Chatbot integrácia.
-- [ ] **Fáza 4:** Dashboard a Analytics.
-- [ ] **Fáza 5:** Komplexné testovanie a optimalizácia.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
-*Vytvorené s ❤️ pre BookFlow Pro.*
+Crafted with ❤️ and ☕ by **Antigravity**
+
+_Redefining Web Excellence._

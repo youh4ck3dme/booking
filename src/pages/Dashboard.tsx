@@ -4,17 +4,52 @@ import { useAuthStore } from "../stores/authStore";
 import { DashboardStats } from "../components/dashboard/DashboardStats";
 import { DashboardBookings } from "../components/dashboard/DashboardBookings";
 import { Button } from "../components/ui/Button";
-import { Plus, Users, Settings, Printer, Calendar } from "lucide-react";
+import {
+  Plus,
+  Users,
+  Settings as SettingsIcon,
+  Printer,
+  Calendar,
+} from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
+import { useBlockTime } from "../hooks/useBookings";
+import { useEmployees } from "../hooks/useEmployees";
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuthStore();
+  const blockMutation = useBlockTime();
+  const { data: employees = [] } = useEmployees();
 
   if (user?.role === "customer") {
     return <Navigate to="/my-bookings" replace />;
   }
 
   const isAdmin = user?.role === "admin";
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleBlockTime = async () => {
+    if (employees.length === 0) {
+      alert("Nenašli sa žiadni zamestnanci pre blokovanie termínu.");
+      return;
+    }
+
+    const time = prompt("Zadajte čas blokovania (HH:mm):", "09:00");
+    if (!time) return;
+
+    try {
+      await blockMutation.mutateAsync({
+        employeeId: employees[0].id,
+        date: new Date(),
+        startTime: time,
+        duration: 30,
+      });
+    } catch (err) {
+      console.error("Block failed:", err);
+    }
+  };
 
   return (
     <div className="container py-xl">
@@ -38,9 +73,11 @@ export const Dashboard: React.FC = () => {
 
         <div className="flex gap-sm">
           {isAdmin && (
-            <Button variant="outline" leftIcon={<Settings size={18} />}>
-              Nastavenia
-            </Button>
+            <Link to="/settings">
+              <Button variant="outline" leftIcon={<SettingsIcon size={18} />}>
+                Nastavenia
+              </Button>
+            </Link>
           )}
           <Link to="/book">
             <Button leftIcon={<Plus size={20} />}>Nová rezervácia</Button>
@@ -79,36 +116,43 @@ export const Dashboard: React.FC = () => {
                 variant="secondary"
                 className="flex-col h-auto p-md gap-sm"
                 title="Tlač denného prehľadu"
+                onClick={handlePrint}
               >
                 <Printer size={24} />
                 <span className="text-xs">Tlač prehľadu</span>
               </Button>
               {isAdmin && (
-                <Button
-                  variant="secondary"
-                  className="flex-col h-auto p-md gap-sm"
-                  title="Správa zamestnancov"
-                >
-                  <Users size={24} />
-                  <span className="text-xs">Zamestnanci</span>
-                </Button>
+                <Link to="/staff" className="flex-col h-auto p-md gap-sm">
+                  <Button
+                    variant="secondary"
+                    className="w-full flex-col h-auto p-md gap-sm"
+                    title="Správa zamestnancov"
+                  >
+                    <Users size={24} />
+                    <span className="text-xs">Zamestnanci</span>
+                  </Button>
+                </Link>
               )}
               <Button
                 variant="secondary"
                 className="flex-col h-auto p-md gap-sm"
                 title="Blokovať termín"
+                onClick={handleBlockTime}
+                isLoading={blockMutation.isPending}
               >
                 <Calendar size={24} />
                 <span className="text-xs">Blokovať</span>
               </Button>
-              <Button
-                variant="secondary"
-                className="flex-col h-auto p-md gap-sm"
-                title="Nastavenia"
-              >
-                <Settings size={24} />
-                <span className="text-xs">Nastavenia</span>
-              </Button>
+              <Link to="/settings" className="flex-col h-auto p-md gap-sm">
+                <Button
+                  variant="secondary"
+                  className="w-full flex-col h-auto p-md gap-sm"
+                  title="Nastavenia"
+                >
+                  <SettingsIcon size={24} />
+                  <span className="text-xs">Nastavenia</span>
+                </Button>
+              </Link>
             </div>
           </motion.div>
 
@@ -122,9 +166,20 @@ export const Dashboard: React.FC = () => {
               <span className="text-yellow-400">💡</span> Pro Tip
             </h3>
             <p className="text-sm text-secondary leading-relaxed">
-              {isAdmin
-                ? "Skontrolujte vyťaženosť zamestnancov v sekcii Štatistiky pre optimalizáciu smien."
-                : "Nezabudnite si vyznačiť obednú pauzu v kalendári aspoň 24h vopred."}
+              {isAdmin ? (
+                <>
+                  Skontrolujte vyťaženosť zamestnancov v sekcii{" "}
+                  <Link
+                    to="/statistics"
+                    className="text-primary hover:underline font-bold"
+                  >
+                    Štatistiky
+                  </Link>{" "}
+                  pre optimalizáciu smien.
+                </>
+              ) : (
+                "Nezabudnite si vyznačiť obednú pauzu v kalendári aspoň 24h vopred."
+              )}
             </p>
           </motion.div>
 

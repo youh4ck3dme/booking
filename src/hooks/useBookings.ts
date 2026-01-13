@@ -93,6 +93,7 @@ export function useCreateBooking() {
                 price: service.price,
                 status: 'pending',
                 notes: formData.notes,
+                location_id: formData.locationId,
             };
 
             const { data: inserted, error } = await supabase
@@ -157,5 +158,51 @@ export function useAvailableSlots(date: Date | null, service: Service | undefine
         },
         enabled: !!date && !!service && !!employees,
         staleTime: 1000 * 30, // 30 seconds
+    });
+}
+export function useBlockTime() {
+    const queryClient = useQueryClient();
+    const toast = useToast();
+
+    return useMutation({
+        mutationFn: async (data: { employeeId: string; date: Date; startTime: string; duration: number }) => {
+            if (isDemoMode) return true;
+
+            const { employeeId, date, startTime, duration } = data;
+            const startDate = parse(startTime, 'HH:mm', date);
+            const endDate = addMinutes(startDate, duration);
+            const endTimeStr = format(endDate, 'HH:mm');
+
+            const dbBooking = {
+                customer_name: 'BLOKOVANÉ',
+                customer_email: 'blocked@bookflow.sk',
+                customer_phone: '',
+                employee_id: employeeId,
+                service_id: 'blocked', // Placeholder for blocked time
+                date: format(date, 'yyyy-MM-dd'),
+                start_time: startTime,
+                end_time: endTimeStr,
+                duration: duration,
+                price: 0,
+                status: 'confirmed', // Blocked time is auto-confirmed
+                notes: 'Administratívne blokovanie termínu',
+            };
+
+            const { data: inserted, error } = await supabase
+                .from('bookings')
+                .insert(dbBooking)
+                .select()
+                .single();
+
+            if (error) throw error;
+            return inserted;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
+            toast.info('Termín bol úspešne zablokovaný.');
+        },
+        onError: (error: Error) => {
+            toast.error('Chyba pri blokovaní termínu', error.message);
+        },
     });
 }

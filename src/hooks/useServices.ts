@@ -11,17 +11,22 @@ const DEMO_SERVICES: Service[] = [
     { id: 's6', name: 'Masáž', description: 'Relaxačná masáž', duration: 60, price: 40, category: 'wellness', color: '#ef4444', icon: '💆' },
 ];
 
-export function useServices() {
+export function useServices(locationId?: string) {
     return useQuery<Service[]>({
-        queryKey: ['services'],
+        queryKey: ['services', locationId],
         queryFn: async () => {
             if (isDemoMode) return DEMO_SERVICES;
 
-            const { data, error } = await supabase
+            let query = supabase
                 .from('services')
                 .select('*')
-                .eq('is_active', true)
-                .order('name');
+                .eq('is_active', true);
+
+            if (locationId) {
+                query = query.eq('location_id', locationId);
+            }
+
+            const { data, error } = await query.order('name');
 
             if (error) throw error;
             return data as Service[];

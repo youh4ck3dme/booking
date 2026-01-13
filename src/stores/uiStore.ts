@@ -8,6 +8,10 @@ interface UIStore extends UIState {
     addNotification: (notification: Omit<AppNotification, 'id'>) => void;
     removeNotification: (id: string) => void;
     clearNotifications: () => void;
+    isSidebarOpen: boolean;
+    openSidebar: () => void;
+    closeSidebar: () => void;
+    toggleSidebar: () => void;
 }
 
 const defaultTheme: Theme = {
@@ -61,6 +65,11 @@ export const useUIStore = create<UIStore>()(
             },
 
             clearNotifications: () => set({ notifications: [] }),
+
+            isSidebarOpen: false,
+            openSidebar: () => set({ isSidebarOpen: true }),
+            closeSidebar: () => set({ isSidebarOpen: false }),
+            toggleSidebar: () => set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
         }),
         {
             name: 'bookflow-ui',
