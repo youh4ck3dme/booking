@@ -38,6 +38,8 @@ class BookFlow_Pro
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-api.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-admin.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-locations.php';
+        require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-services.php';
+        require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-employees.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-shortcodes.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-blocks.php';
     }
@@ -51,6 +53,9 @@ class BookFlow_Pro
     public function init()
     {
         BookFlow_Admin::init();
+        BookFlow_Locations::instance();
+        BookFlow_Services::instance();
+        BookFlow_Employees::instance();
         BookFlow_Shortcodes::init();
         BookFlow_Blocks::init();
     }

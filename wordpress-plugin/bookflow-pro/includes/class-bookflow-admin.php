@@ -35,7 +35,21 @@ class BookFlow_Admin
             array(__CLASS__, 'render_settings_page')
         );
 
-        // Locations is added automatically via CPT 'show_in_menu' => 'bookflow-pro'
+        add_submenu_page(
+            'bookflow-pro',
+            __('Služby', 'bookflow-pro'),
+            __('Služby', 'bookflow-pro'),
+            'manage_options',
+            'edit.php?post_type=bf_service'
+        );
+
+        add_submenu_page(
+            'bookflow-pro',
+            __('Zamestnanci', 'bookflow-pro'),
+            __('Zamestnanci', 'bookflow-pro'),
+            'manage_options',
+            'edit.php?post_type=bf_employee'
+        );
     }
 
     public static function register_settings()

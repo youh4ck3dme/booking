@@ -144,4 +144,85 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
     }
 });
 
+/**
+ * POST /api/v1/employees
+ * Create or update an employee
+ */
+router.post('/', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id, name, avatarUrl, color, services, locationId } = req.body;
+
+        if (!name) {
+            res.status(400).json({ success: false, error: 'Employee name is required' });
+            return;
+        }
+
+        const employeeData = {
+            name,
+            avatar_url: avatarUrl,
+            color: color || '#3B82F6',
+            services: services || [],
+            location_id: locationId,
+            is_active: true,
+            updated_at: new Date()
+        };
+
+        let result;
+        if (id) {
+            const { data, error } = await supabase
+                .from('employees')
+                .update(employeeData)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            result = data;
+        } else {
+            const { data, error } = await supabase
+                .from('employees')
+                .insert([employeeData])
+                .select()
+                .single();
+
+            if (error) throw error;
+            result = data;
+        }
+
+        res.json({ success: true, data: result });
+
+    } catch (err) {
+        console.error('Employee save error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to save employee'
+        });
+    }
+});
+
+/**
+ * DELETE /api/v1/employees/:id
+ * Soft delete an employee
+ */
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('employees')
+            .update({ is_active: false, updated_at: new Date() })
+            .eq('id', id);
+
+        if (error) throw error;
+        res.status(204).send();
+
+    } catch (err) {
+        console.error('Employee delete error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete employee'
+        });
+    }
+});
+
 export default router;

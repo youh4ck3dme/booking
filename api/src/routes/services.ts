@@ -133,4 +133,88 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
     }
 });
 
+/**
+ * POST /api/v1/services
+ * Create or update a service
+ */
+router.post('/', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id, name, description, duration, price, category, color, icon, locationId } = req.body;
+
+        if (!name) {
+            res.status(400).json({ success: false, error: 'Service name is required' });
+            return;
+        }
+
+        const serviceData = {
+            name,
+            description,
+            duration,
+            price,
+            category,
+            color: color || '#3B82F6',
+            icon: icon || 'scissors',
+            location_id: locationId,
+            is_active: true,
+            updated_at: new Date()
+        };
+
+        let result;
+        if (id) {
+            const { data, error } = await supabase
+                .from('services')
+                .update(serviceData)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            result = data;
+        } else {
+            const { data, error } = await supabase
+                .from('services')
+                .insert([serviceData])
+                .select()
+                .single();
+
+            if (error) throw error;
+            result = data;
+        }
+
+        res.json({ success: true, data: result });
+
+    } catch (err) {
+        console.error('Service save error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to save service'
+        });
+    }
+});
+
+/**
+ * DELETE /api/v1/services/:id
+ * Soft delete a service (set is_active to false)
+ */
+router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('services')
+            .update({ is_active: false, updated_at: new Date() })
+            .eq('id', id);
+
+        if (error) throw error;
+        res.status(204).send();
+
+    } catch (err) {
+        console.error('Service delete error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete service'
+        });
+    }
+});
+
 export default router;
