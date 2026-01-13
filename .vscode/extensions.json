@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "blackboxapp.blackboxagent",
+        "davidanson.vscode-markdownlint",
+        "eamodio.gitlens",
+        "dbaeumer.vscode-eslint"
+    ]
+}
