@@ -31,6 +31,7 @@ export interface Location {
   email: string;
   businessHours: WorkingHours;
   coordinates?: { lat: number; lng: number };
+  distance?: number; // km
 }
 
 // ... existing types ...

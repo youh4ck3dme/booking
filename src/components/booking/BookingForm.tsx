@@ -449,34 +449,56 @@ export const BookingForm: React.FC = () => {
 
   return (
     <div className="w-full">
-      {/* Progress Steps */}
-      <div className="mb-xl relative">
-        <div className="absolute top-1/2 left-0 w-full h-1 bg-white/10 -translate-y-1/2 rounded-full z-0" />
+      {/* Liquid Progress Indicator */}
+      <div className="mb-2xl relative pt-6">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-secondary-dark via-secondary to-secondary-light shadow-[0_0_15px_rgba(197,160,89,0.5)]"
+            initial={{ width: "0%" }}
+            animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+            transition={{ type: "spring", damping: 20, stiffness: 50 }}
+          />
+        </div>
         <div className="relative z-10 flex justify-between">
           {steps.map((step) => {
             const isActive = currentStep >= step.id;
             const isFinished = currentStep > step.id;
 
             return (
-              <div
-                key={step.id}
-                className="flex flex-col items-center gap-xs bg-[#1a1c2e] px-2"
-              >
-                <div
+              <div key={step.id} className="flex flex-col items-center gap-xs">
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                    backgroundColor: isActive
+                      ? "var(--color-secondary)"
+                      : "rgba(255,255,255,0.05)",
+                  }}
                   className={`
-                    w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-300
+                    w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500
                     ${
                       isActive
-                        ? "bg-primary text-white shadow-glow"
-                        : "bg-white/10 text-muted"
+                        ? "text-primary-dark shadow-gold"
+                        : "text-muted border border-white/5"
                     }
                   `}
                 >
-                  {isFinished ? <Check size={20} /> : <step.icon size={20} />}
-                </div>
+                  {isFinished ? (
+                    <Check size={24} strokeWidth={3} />
+                  ) : (
+                    <step.icon size={22} />
+                  )}
+
+                  {isActive && (
+                    <motion.div
+                      layoutId="step-glow"
+                      className="absolute inset-0 rounded-xl bg-secondary/20 blur-md -z-10"
+                      transition={{ type: "spring", bounce: 0.4 }}
+                    />
+                  )}
+                </motion.div>
                 <span
-                  className={`text-[10px] md:text-xs font-medium ${
-                    isActive ? "text-white" : "text-muted"
+                  className={`text-[10px] md:text-xs font-bold uppercase tracking-widest ${
+                    isActive ? "text-secondary" : "text-muted"
                   }`}
                 >
                   {step.title}
@@ -487,16 +509,23 @@ export const BookingForm: React.FC = () => {
         </div>
       </div>
 
-      <motion.div
-        key={currentStep}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ duration: 0.3 }}
-        className="min-h-[400px]"
-      >
-        {renderStepContent()}
-      </motion.div>
+      <div className="relative overflow-hidden min-h-[500px]">
+        <motion.div
+          key={currentStep}
+          initial={{ opacity: 0, x: 50, scale: 0.98 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: -50, scale: 1.02 }}
+          transition={{
+            type: "spring",
+            damping: 25,
+            stiffness: 120,
+            mass: 0.8,
+          }}
+          className="w-full"
+        >
+          {renderStepContent()}
+        </motion.div>
+      </div>
 
       {currentStep < steps.length ? (
         <div className="flex justify-between mt-xl border-t border-white/10 pt-lg">

@@ -33,30 +33,69 @@ const DEMO_LOCATIONS: Location[] = [
     }
 ];
 
-export function useLocations() {
+// Helper to calculate distance between two coordinates (Haversine formula)
+function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+export function useLocations(userCoords?: { lat: number, lng: number }) {
     return useQuery<Location[]>({
-        queryKey: ['locations'],
+        queryKey: ['locations', userCoords],
         queryFn: async () => {
-            if (isDemoMode) return DEMO_LOCATIONS;
+            let locations: Location[] = [];
 
-            const { data, error } = await supabase
-                .from('locations')
-                .select('*')
-                .order('name');
+            if (isDemoMode) {
+                locations = [...DEMO_LOCATIONS];
+                // Add sample coords for demo sorting if needed
+                if (locations[0]) locations[0].coordinates = { lat: 48.148, lng: 17.107 };
+                if (locations[1]) locations[1].coordinates = { lat: 48.716, lng: 21.261 };
+            } else {
+                const { data, error } = await supabase
+                    .from('locations')
+                    .select('*')
+                    .order('name');
 
-            if (error) throw error;
+                if (error) throw error;
 
-            // Map Snake Case from DB to Camel Case for UI
-            return data.map(loc => ({
-                id: loc.id,
-                name: loc.name,
-                address: loc.address,
-                phone: loc.phone,
-                email: loc.email,
-                businessHours: loc.business_hours,
-                coordinates: loc.coordinates
-            })) as Location[];
+                locations = data.map(loc => ({
+                    id: loc.id,
+                    name: loc.name,
+                    address: loc.address,
+                    phone: loc.phone,
+                    email: loc.email,
+                    businessHours: loc.business_hours,
+                    coordinates: loc.coordinates
+                })) as Location[];
+            }
+
+            // Calculate distances and sort if user coordinates are available
+            if (userCoords && locations.length > 0) {
+                return locations.map(loc => {
+                    if (loc.coordinates) {
+                        return {
+                            ...loc,
+                            distance: getDistance(
+                                userCoords.lat,
+                                userCoords.lng,
+                                loc.coordinates.lat,
+                                loc.coordinates.lng
+                            )
+                        };
+                    }
+                    return loc;
+                }).sort((a, b) => (a.distance || 9999) - (b.distance || 9999));
+            }
+
+            return locations;
         },
-        staleTime: 1000 * 60 * 60, // 1 hour
+        staleTime: 1000 * 60 * 6, // 6 minutes
     });
 }

@@ -1,11 +1,11 @@
 {
     "name": "BookFlow Pro",
     "short_name": "BookFlow",
-    "description": "Moderný booking systém pre firmy a zamestnancov",
+    "description": "Premium booking systém pre firmy a zamestnancov",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0f0f23",
-    "theme_color": "#6366f1",
+    "background_color": "#020617",
+    "theme_color": "#c5a059",
     "orientation": "portrait-primary",
     "icons": [
         {
