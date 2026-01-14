@@ -20,19 +20,19 @@ class BookFlow_Pro
     /**
      * The single instance of the class.
      *
-     * @var BookFlow_Pro
+     * @var self|null
      */
     private static $instance = null;
 
     /**
      * Main BookFlow_Pro Instance.
      *
-     * @return BookFlow_Pro
+     * @return self
      */
     public static function instance()
     {
         if (null === self::$instance) {
-            self::$instance = new BookFlow_Pro();
+            self::$instance = new self();
         }
         return self::$instance;
     }
@@ -88,7 +88,7 @@ class BookFlow_Pro
 }
 
 /**
- * @return BookFlow_Pro
+ * Returns the main BookFlow instance.
  */
 function BookFlow()
 {

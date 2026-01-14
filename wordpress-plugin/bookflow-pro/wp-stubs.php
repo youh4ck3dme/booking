@@ -5,6 +5,16 @@
  * This file is NOT part of the plugin logic and is only for the IDE.
  */
 
+if (!class_exists('BookFlow_Pro')) {
+    class BookFlow_Pro
+    {
+        public static function instance()
+        {
+            return new self();
+        }
+    }
+}
+
 if (!defined('ABSPATH')) define('ABSPATH', '/');
 if (!defined('DOING_AUTOSAVE')) define('DOING_AUTOSAVE', false);
 if (!defined('OBJECT')) define('OBJECT', 'OBJECT');
