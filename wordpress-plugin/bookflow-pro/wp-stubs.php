@@ -139,4 +139,8 @@ if (!function_exists('add_action')) {
     {
         return '';
     }
+    function date_i18n($format, $timestamp_with_offset = false, $gmt = false)
+    {
+        return '';
+    }
 }

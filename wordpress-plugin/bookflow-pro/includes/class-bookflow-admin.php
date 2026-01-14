@@ -25,6 +25,15 @@ class BookFlow_Admin
             25
         );
 
+        add_submenu_page(
+            'bookflow-pro',
+            __('Rezervácie', 'bookflow-pro'),
+            __('Rezervácie', 'bookflow-pro'),
+            'manage_options',
+            'bookflow-bookings',
+            array('BookFlow_Bookings', 'render_page')
+        );
+
         // Submenu: Settings (re-point the main slug)
         add_submenu_page(
             'bookflow-pro',

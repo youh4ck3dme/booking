@@ -50,6 +50,7 @@ class BookFlow_Pro
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-locations.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-services.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-employees.php';
+        require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-bookings.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-shortcodes.php';
         require_once BOOKFLOW_PLUGIN_DIR . 'includes/class-bookflow-blocks.php';
     }

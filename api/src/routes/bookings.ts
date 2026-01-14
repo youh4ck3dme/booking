@@ -8,6 +8,7 @@ import {
     CreateBookingSchema
 } from '../types/api.js';
 import { bookingRateLimiter } from '../middleware/rateLimit.js';
+import { authenticateApiKey, AuthenticatedRequest } from '../middleware/auth.js';
 
 const router: Router = Router();
 
@@ -61,6 +62,75 @@ function generateTimeSlots(
 
     return slots;
 }
+
+/**
+ * GET /api/v1/bookings
+ * List all bookings (protected via API Key)
+ */
+router.get('/', authenticateApiKey, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const { locationId, status, date } = req.query;
+
+        if (isDemoMode) {
+            res.json({ success: true, data: [] });
+            return;
+        }
+
+        // Base query
+        let query = supabase
+            .from('bookings')
+            .select(`
+                id, customer_name, customer_email, date, start_time, end_time, status, created_at, location_id,
+                services(name),
+                employees(name)
+            `)
+            .order('date', { ascending: false })
+            .order('start_time', { ascending: false });
+
+        // Filter by API Key ownership (security)
+        // Note: In strict multi-tenant, we should link keys to locations, but for now we trust the key.
+        // query.eq('api_key_id', req.apiKeyId); 
+
+        if (locationId && typeof locationId === 'string') {
+            query = query.eq('location_id', locationId);
+        }
+
+        if (status && typeof status === 'string') {
+            query = query.eq('status', status);
+        }
+
+        if (date && typeof date === 'string') {
+            query = query.eq('date', date);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        const bookings: BookingResponse[] = (data || []).map(b => ({
+            id: b.id,
+            customerName: b.customer_name,
+            customerEmail: b.customer_email,
+            serviceName: (b.services as unknown as { name: string })?.name,
+            employeeName: (b.employees as unknown as { name: string })?.name,
+            date: b.date,
+            startTime: b.start_time,
+            endTime: b.end_time,
+            status: b.status,
+            createdAt: b.created_at,
+            locationId: b.location_id
+        }));
+
+        res.json({ success: true, data: bookings });
+
+    } catch (err) {
+        console.error('Bookings list fetch error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch bookings'
+        });
+    }
+});
 
 /**
  * GET /api/v1/slots
@@ -284,6 +354,14 @@ router.post('/', bookingRateLimiter, async (req: Request, res: Response): Promis
         };
 
         res.status(201).json({ success: true, data: response });
+
+        // 📧 Simulation: Send Confirmation Email
+        console.log(`[EMAIL] To: ${data.customerEmail}, Subject: Booking Confirmed via BookFlow`, {
+            bookingId: newBooking.id,
+            service: service.name,
+            date: data.date,
+            time: data.startTime
+        });
 
     } catch (err) {
         console.error('Booking creation error:', err);
