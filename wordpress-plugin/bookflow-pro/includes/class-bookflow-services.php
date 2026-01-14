@@ -18,6 +18,7 @@ class BookFlow_Services
         add_action('init', array($this, 'register_post_type'));
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post_bf_service', array($this, 'save_meta_boxes'));
+        add_action('before_delete_post', array($this, 'delete_from_api'));
         add_action('wp_ajax_bf_sync_service', array($this, 'ajax_sync_service'));
     }
 
@@ -128,6 +129,10 @@ class BookFlow_Services
     public function sync_with_api($post_id)
     {
         $post = get_post($post_id);
+        if (!$post) {
+            return;
+        }
+
         $api_id = get_post_meta($post_id, '_bf_api_id', true);
 
         if (empty($api_id)) {
@@ -148,5 +153,16 @@ class BookFlow_Services
 
         $api = BookFlow_API::instance();
         $api->post('services', $service_data);
+    }
+
+    public function delete_from_api($post_id)
+    {
+        if (get_post_type($post_id) !== 'bf_service') return;
+
+        $api_id = get_post_meta($post_id, '_bf_api_id', true);
+        if ($api_id) {
+            $api = BookFlow_API::instance();
+            $api->delete('services/' . $api_id);
+        }
     }
 }

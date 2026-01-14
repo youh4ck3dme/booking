@@ -18,6 +18,7 @@ class BookFlow_Employees
         add_action('init', array($this, 'register_post_type'));
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post_bf_employee', array($this, 'save_meta_boxes'));
+        add_action('before_delete_post', array($this, 'delete_from_api'));
     }
 
     public function register_post_type()
@@ -127,6 +128,10 @@ class BookFlow_Employees
     public function sync_with_api($post_id)
     {
         $post = get_post($post_id);
+        if (!$post) {
+            return;
+        }
+
         $api_id = get_post_meta($post_id, '_bf_api_id', true);
 
         if (empty($api_id)) {
@@ -147,5 +152,16 @@ class BookFlow_Employees
 
         $api = BookFlow_API::instance();
         $api->post('employees', $employee_data);
+    }
+
+    public function delete_from_api($post_id)
+    {
+        if (get_post_type($post_id) !== 'bf_employee') return;
+
+        $api_id = get_post_meta($post_id, '_bf_api_id', true);
+        if ($api_id) {
+            $api = BookFlow_API::instance();
+            $api->delete('employees/' . $api_id);
+        }
     }
 }

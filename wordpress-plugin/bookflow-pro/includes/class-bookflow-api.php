@@ -54,6 +54,11 @@ class BookFlow_API
         return $this->request($endpoint, 'POST', $body);
     }
 
+    public function delete($endpoint)
+    {
+        return $this->request($endpoint, 'DELETE');
+    }
+
     public function test_connection()
     {
         return $this->request('/api/v1/services');

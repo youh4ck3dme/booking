@@ -17,12 +17,22 @@ define('BOOKFLOW_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 class BookFlow_Pro
 {
+    /**
+     * The single instance of the class.
+     *
+     * @var BookFlow_Pro
+     */
     private static $instance = null;
 
+    /**
+     * Main BookFlow_Pro Instance.
+     *
+     * @return BookFlow_Pro
+     */
     public static function instance()
     {
         if (null === self::$instance) {
-            self::$instance = new self();
+            self::$instance = new BookFlow_Pro();
         }
         return self::$instance;
     }
@@ -76,6 +86,9 @@ class BookFlow_Pro
     }
 }
 
+/**
+ * @return BookFlow_Pro
+ */
 function BookFlow()
 {
     return BookFlow_Pro::instance();
