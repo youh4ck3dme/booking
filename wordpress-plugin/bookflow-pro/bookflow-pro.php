@@ -15,6 +15,13 @@ define('BOOKFLOW_VERSION', '1.0.0');
 define('BOOKFLOW_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BOOKFLOW_PLUGIN_URL', plugin_dir_url(__FILE__));
 
+/**
+ * Main BookFlow Pro Plugin Class.
+ * 
+ * @method void includes()
+ * @method void init_hooks()
+ * @property self|null $instance
+ */
 class BookFlow_Pro
 {
     /**
