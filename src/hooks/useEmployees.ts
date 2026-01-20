@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { supabase, isDemoMode } from '../lib/supabase';
 import type { Employee, WorkingHours } from '../types';
 
@@ -22,7 +22,7 @@ const DEMO_EMPLOYEES: Employee[] = [
     { id: 'e3', name: 'Peter Horváth', email: 'peter@bookflow.sk', phone: '+421900555666', avatar: '', services: ['s1', 's4', 's6'], color: '#10b981', workingHours: { monday: { start: '08:00', end: '16:00' }, tuesday: { start: '08:00', end: '16:00' }, wednesday: { start: '08:00', end: '16:00' }, thursday: { start: '08:00', end: '16:00' }, friday: { start: '08:00', end: '14:00' } } },
 ];
 
-export function useEmployees(locationId?: string) {
+export function useEmployees(locationId?: string): UseQueryResult<Employee[], Error> {
     return useQuery<Employee[]>({
         queryKey: ['employees', locationId],
         queryFn: async () => {
@@ -56,7 +56,7 @@ export function useEmployees(locationId?: string) {
     });
 }
 
-export function useCreateEmployee() {
+export function useCreateEmployee(): UseMutationResult<Employee, Error, Omit<Employee, 'id'>, unknown> {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (newEmployee: Omit<Employee, 'id'>) => {
@@ -89,7 +89,7 @@ export function useCreateEmployee() {
     });
 }
 
-export function useUpdateEmployee() {
+export function useUpdateEmployee(): UseMutationResult<Employee, Error, Employee, unknown> {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (employee: Employee) => {
@@ -117,7 +117,7 @@ export function useUpdateEmployee() {
     });
 }
 
-export function useDeleteEmployee() {
+export function useDeleteEmployee(): UseMutationResult<string, Error, string, unknown> {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (id: string) => {

@@ -13,6 +13,7 @@ import {
   AlertCircle,
   MapPin,
 } from "lucide-react";
+import { StaffAvatar } from "../icons/StaffAvatar";
 import { useBookingStore } from "../../stores/bookingStore";
 import { useAuthStore } from "../../stores/authStore";
 import { Button } from "../ui/Button";
@@ -251,18 +252,25 @@ export const BookingForm: React.FC = () => {
                       </motion.div>
                     )}
                     <div
-                      className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg transition-transform duration-300 ${
+                      className={`w-14 h-14 rounded-full flex items-center justify-center overflow-hidden shadow-lg transition-transform duration-300 ${
                         formData.employeeId === emp.id
                           ? "scale-110 ring-2 ring-white/20"
                           : "group-hover:scale-105"
                       }`}
-                      style={{
-                        background: emp.avatar
-                          ? `url(${emp.avatar}) center/cover`
-                          : `linear-gradient(135deg, ${emp.color} 0%, ${emp.color}dd 100%)`,
-                      }}
                     >
-                      {!emp.avatar && emp.name.charAt(0)}
+                      {emp.avatar ? (
+                        <img
+                          src={emp.avatar}
+                          alt={emp.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <StaffAvatar
+                          name={emp.name}
+                          color={emp.color}
+                          size={56}
+                        />
+                      )}
                     </div>
                     <div className="text-center z-10 w-full">
                       <span className="block text-sm font-bold text-white truncate px-2">

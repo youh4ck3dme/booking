@@ -23,14 +23,14 @@ describe('ChatWidget Integration', () => {
 
     it('is closed by default', () => {
         renderChat();
-        expect(screen.queryByText('AI Asistent')).not.toBeInTheDocument();
+        expect(screen.queryByText('BookFlow Asistent')).not.toBeInTheDocument();
     });
 
     it('opens on click', () => {
         renderChat();
         const button = document.querySelector('button');
         if (button) fireEvent.click(button);
-        expect(screen.getByText('AI Asistent')).toBeInTheDocument();
+        expect(screen.getByText('BookFlow Asistent')).toBeInTheDocument();
     });
 
     it('sends message', async () => {

@@ -9,21 +9,9 @@ interface ChatStore extends ChatState {
     clearMessages: () => void;
 }
 
-const initialMessages: ChatMessage[] = [
-    {
-        id: 'welcome',
-        role: 'assistant',
-        content: 'Dobrý deň! 👋 Som váš AI asistent. Ako vám môžem pomôcť s rezerváciou?',
-        timestamp: new Date(),
-        actions: [
-            { type: 'info', label: 'Cenník služieb', data: { action: 'pricelist' } },
-            { type: 'book', label: 'Nová rezervácia', data: { action: 'book' } },
-        ]
-    }
-];
-
+// Start with empty messages - welcome message is now handled by ChatWidget
 export const useChatStore = create<ChatStore>((set) => ({
-    messages: initialMessages,
+    messages: [],
     isTyping: false,
     isOpen: false,
 
@@ -41,5 +29,5 @@ export const useChatStore = create<ChatStore>((set) => ({
     setTyping: (isTyping) => set({ isTyping }),
     toggleOpen: () => set((state) => ({ isOpen: !state.isOpen })),
     setOpen: (isOpen) => set({ isOpen }),
-    clearMessages: () => set({ messages: initialMessages }),
+    clearMessages: () => set({ messages: [] }),
 }));

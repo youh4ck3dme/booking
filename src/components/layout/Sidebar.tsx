@@ -120,6 +120,7 @@ export const Sidebar: React.FC = () => {
                 size="sm"
                 onClick={closeSidebar}
                 className="hover:bg-red-500/10 hover:text-red-400"
+                aria-label="Zavrieť menu"
               >
                 <X size={24} />
               </Button>

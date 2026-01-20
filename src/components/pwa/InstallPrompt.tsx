@@ -53,6 +53,7 @@ export const InstallPrompt: React.FC = () => {
                     <button
                         onClick={() => setIsVisible(false)}
                         className="absolute top-2 right-2 p-1 text-secondary hover:text-primary transition-colors"
+                        aria-label="Zavrieť"
                     >
                         <X size={16} />
                     </button>

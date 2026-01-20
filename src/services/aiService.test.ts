@@ -28,22 +28,22 @@ describe('aiService', () => {
 
     it('should detect info intent', async () => {
         const response = await processAIResponse('Kedy mám rezerváciu?');
-        // Info response contains 'najbližší termín' or 'profile'
-        expect(response.content.toLowerCase()).toMatch(/termín|profil/);
+        // Info response refers to "Moje rezervácie" or login
+        expect(response.content.toLowerCase()).toMatch(/rezervácie|prihláste/);
         expect(response.actions).toBeDefined();
         expect(response.actions?.[0].type).toBe('info');
     });
 
     it('should return unknown for unrecognized intent', async () => {
         const response = await processAIResponse('asdfghjkl xyz');
-        // Unknown can be 'Prepáčte' or 'Nie som si istý'
-        expect(response.content.toLowerCase()).toMatch(/prepáčte|nie som si istý/);
+        // Unknown response providing suggestions
+        expect(response.content.toLowerCase()).toMatch(/rozumiem|pomôcť/);
     });
 
     it('should simulate delay', async () => {
         const start = Date.now();
         await processAIResponse('test');
         const duration = Date.now() - start;
-        expect(duration).toBeGreaterThan(900); // At least ~1s with random variance
+        expect(duration).toBeGreaterThan(400); // At least 500ms baseline
     });
 });

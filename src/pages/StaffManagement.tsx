@@ -116,6 +116,7 @@ export const StaffManagement: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsEditing(false)}
+                  aria-label="Zavrieť formulár"
                 >
                   <X size={20} />
                 </Button>
@@ -222,6 +223,7 @@ export const StaffManagement: React.FC = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(emp)}
+                        aria-label={`Upraviť ${emp.name}`}
                       >
                         <Edit2 size={16} />
                       </Button>
@@ -230,6 +232,7 @@ export const StaffManagement: React.FC = () => {
                         size="sm"
                         className="text-red-500 hover:bg-red-500/10 border-red-500/20"
                         onClick={() => handleDelete(emp.id)}
+                        aria-label={`Odstrániť ${emp.name}`}
                       >
                         <Trash2 size={16} />
                       </Button>

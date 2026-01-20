@@ -124,6 +124,7 @@ describe('useBookings Hooks', () => {
         const formData = {
             serviceId: 's1',
             employeeId: 'e1',
+            locationId: 'loc1',
             date: new Date(),
             timeSlot: '10:00',
             customerName: 'Test',

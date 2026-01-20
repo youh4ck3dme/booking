@@ -76,7 +76,7 @@ export const DashboardStats: React.FC = () => {
             trend: '+20% vs včera',
             trendUp: true,
             icon: Calendar,
-            color: 'from-blue-500 to-blue-600',
+            color: 'from-secondary to-secondary-dark',
             testId: 'stat-today-bookings'
         },
         {
@@ -85,7 +85,7 @@ export const DashboardStats: React.FC = () => {
             trend: '+12% tento mesiac',
             trendUp: true,
             icon: Users,
-            color: 'from-purple-500 to-purple-600',
+            color: 'from-secondary-light to-secondary',
             testId: 'stat-total-customers'
         },
         {
@@ -103,7 +103,7 @@ export const DashboardStats: React.FC = () => {
             trend: '-2% vs včera',
             trendUp: false,
             icon: TrendingUp,
-            color: 'from-orange-500 to-orange-600',
+            color: 'from-accent to-accent-dark',
             testId: 'stat-occupancy'
         },
     ];

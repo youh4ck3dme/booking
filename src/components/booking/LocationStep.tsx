@@ -35,7 +35,7 @@ export const LocationStep: React.FC<LocationStepProps> = ({
             lng: position.coords.longitude,
           });
         },
-        (error) => console.log("Geolocation error:", error),
+        (error) => console.error("Geolocation error:", error),
         { enableHighAccuracy: true }
       );
     }

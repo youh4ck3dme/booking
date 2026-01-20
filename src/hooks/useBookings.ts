@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { supabase, isDemoMode } from '../lib/supabase';
 import type { Booking, BookingFormData, Service, Employee, TimeSlot, BookingStatus } from '../types';
 import { format, parse, addMinutes } from 'date-fns';
@@ -26,7 +26,7 @@ interface SupabaseBooking {
     updated_at: string;
 }
 
-export function useBookings(userId?: string) {
+export function useBookings(userId?: string): UseQueryResult<Booking[], Error> {
     return useQuery<Booking[]>({
         queryKey: ['bookings', userId],
         queryFn: async () => {
@@ -65,10 +65,9 @@ export function useBookings(userId?: string) {
     });
 }
 
-export function useCreateBooking() {
+export function useCreateBooking(): UseMutationResult<SupabaseBooking, Error, { formData: BookingFormData; service: Service; userId?: string }, unknown> {
     const queryClient = useQueryClient();
     const toast = useToast();
-
     return useMutation({
         mutationFn: async (data: { formData: BookingFormData; service: Service; userId?: string }) => {
             if (isDemoMode) throw new Error('Cannot create booking in demo mode');
@@ -115,10 +114,9 @@ export function useCreateBooking() {
     });
 }
 
-export function useCancelBooking() {
+export function useCancelBooking(): UseMutationResult<boolean, Error, string, unknown> {
     const queryClient = useQueryClient();
     const toast = useToast();
-
     return useMutation({
         mutationFn: async (bookingId: string) => {
             if (isDemoMode) return true;
@@ -141,7 +139,7 @@ export function useCancelBooking() {
     });
 }
 
-export function useAvailableSlots(date: Date | null, service: Service | undefined, employees: Employee[] | undefined) {
+export function useAvailableSlots(date: Date | null, service: Service | undefined, employees: Employee[] | undefined): UseQueryResult<TimeSlot[], Error> {
     return useQuery<TimeSlot[]>({
         queryKey: ['slots', date ? format(date, 'yyyy-MM-dd') : null, service?.id, employees?.length],
         queryFn: async () => {
@@ -160,10 +158,9 @@ export function useAvailableSlots(date: Date | null, service: Service | undefine
         staleTime: 1000 * 30, // 30 seconds
     });
 }
-export function useBlockTime() {
+export function useBlockTime(): UseMutationResult<boolean | SupabaseBooking, Error, { employeeId: string; date: Date; startTime: string; duration: number }, unknown> {
     const queryClient = useQueryClient();
     const toast = useToast();
-
     return useMutation({
         mutationFn: async (data: { employeeId: string; date: Date; startTime: string; duration: number }) => {
             if (isDemoMode) return true;

@@ -4,7 +4,12 @@ import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StaffManagement } from "./StaffManagement";
 import { useAuthStore } from "../stores/authStore";
-import { useEmployees } from "../hooks/useEmployees";
+import {
+  useEmployees,
+  useCreateEmployee,
+  useUpdateEmployee,
+  useDeleteEmployee,
+} from "../hooks/useEmployees";
 
 vi.mock("../stores/authStore");
 vi.mock("../hooks/useEmployees");
@@ -44,7 +49,21 @@ describe("StaffManagement page", () => {
     vi.mocked(useEmployees).mockReturnValue({
       data: mockEmployees,
       isLoading: false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+
+    vi.mocked(useCreateEmployee).mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn(),
+    } as any);
+
+    vi.mocked(useUpdateEmployee).mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn(),
+    } as any);
+
+    vi.mocked(useDeleteEmployee).mockReturnValue({
+      isPending: false,
+      mutateAsync: vi.fn(),
     } as any);
   });
 
@@ -61,13 +80,13 @@ describe("StaffManagement page", () => {
     expect(screen.getByText(/Pridať zamestnanca/i)).toBeInTheDocument();
   });
 
-  it("should open form when add button clicked", () => {
+  it("should open form when add button clicked", async () => {
     render(<StaffManagement />, { wrapper: createWrapper() });
 
     const addButton = screen.getByText(/Pridať zamestnanca/i);
     fireEvent.click(addButton);
 
-    expect(screen.getByLabelText(/Meno/i)).toBeInTheDocument();
+    expect(await screen.findByLabelText(/Meno a priezvisko/i)).toBeInTheDocument();
   });
 
   it("should show loading state", () => {

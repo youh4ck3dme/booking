@@ -50,7 +50,8 @@ describe("useEmployees hooks", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockQuery: any = {
       select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockResolvedValue({ data: mockEmployees, error: null }),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: mockEmployees, error: null }),
     };
     vi.mocked(supabase.from).mockReturnValue(mockQuery);
 

@@ -160,7 +160,7 @@ export const Dashboard: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass-card p-md bg-gradient-to-br from-indigo-900/50 to-purple-900/50 border-primary/30 text-center"
+            className="glass-card p-md bg-gradient-to-br from-secondary-dark/20 to-secondary/10 border-secondary/30 text-center"
           >
             <h3 className="font-bold mb-xs flex items-center justify-center gap-sm">
               <span className="text-yellow-400">💡</span> Pro Tip
@@ -171,7 +171,7 @@ export const Dashboard: React.FC = () => {
                   Skontrolujte vyťaženosť zamestnancov v sekcii{" "}
                   <Link
                     to="/statistics"
-                    className="text-primary hover:underline font-bold"
+                    className="text-secondary hover:underline font-bold"
                   >
                     Štatistiky
                   </Link>{" "}

@@ -26,10 +26,10 @@ export const Statistics: React.FC = () => {
   ];
 
   const servicePopularity = [
-    { name: "Strih vlasov", count: 45, color: "bg-indigo-500" },
-    { name: "Farbenie", count: 32, color: "bg-purple-500" },
-    { name: "Manikúra", count: 28, color: "bg-pink-500" },
-    { name: "Masáž", count: 15, color: "bg-emerald-500" },
+    { name: "Strih vlasov", count: 45, color: "bg-secondary" },
+    { name: "Farbenie", count: 32, color: "bg-secondary-light" },
+    { name: "Manikúra", count: 28, color: "bg-accent" },
+    { name: "Masáž", count: 15, color: "bg-success" },
   ];
 
   const stats = [
@@ -128,7 +128,7 @@ export const Statistics: React.FC = () => {
                         initial={{ height: 0 }}
                         animate={{ height: `${(d.value / 10000) * 100}%` }}
                         transition={{ duration: 1, delay: i * 0.1 }}
-                        className="w-full max-w-[40px] bg-gradient-to-t from-indigo-600 to-purple-500 rounded-t-lg shadow-glow relative"
+                        className="w-full max-w-[40px] bg-gradient-to-t from-secondary-dark to-secondary rounded-t-lg shadow-gold relative"
                       >
                         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-bg-secondary border border-border px-2 py-1 rounded text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                           {d.value}€

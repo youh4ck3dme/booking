@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { supabase, isDemoMode } from '../lib/supabase';
 import type { Location } from '../types';
 
@@ -46,7 +46,7 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): nu
     return R * c;
 }
 
-export function useLocations(userCoords?: { lat: number, lng: number }) {
+export function useLocations(userCoords?: { lat: number, lng: number }): UseQueryResult<Location[], Error> {
     return useQuery<Location[]>({
         queryKey: ['locations', userCoords],
         queryFn: async () => {

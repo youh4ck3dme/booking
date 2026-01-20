@@ -73,7 +73,7 @@ export const Settings: React.FC = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-lg">
+        <form onSubmit={handleSave} className="space-y-xl">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-sm">
