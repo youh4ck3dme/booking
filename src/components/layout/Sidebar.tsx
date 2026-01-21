@@ -216,6 +216,14 @@ export const Sidebar: React.FC = () => {
                   index={1}
                   active={location.pathname === "/my-bookings"}
                 />
+                
+                <MenuItem
+                  icon={<Calendar size={20} />}
+                  label="Kalendár"
+                  onClick={() => handleNavigation("/calendar")}
+                  index={2}
+                  active={location.pathname === "/calendar"}
+                />
 
                 {user?.role === "admin" && (
                   <>

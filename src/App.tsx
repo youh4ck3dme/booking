@@ -53,6 +53,11 @@ const Statistics = React.lazy(() =>
     default: module.Statistics,
   }))
 );
+const Calendar = React.lazy(() =>
+  import("./pages/Calendar").then((module) => ({
+    default: module.default,
+  }))
+);
 
 // Loading Component
 const PageLoader = () => (
@@ -130,6 +135,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Statistics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/calendar"
+                element={
+                  <ProtectedRoute>
+                    <Calendar />
                   </ProtectedRoute>
                 }
               />
