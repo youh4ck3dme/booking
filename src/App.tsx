@@ -6,6 +6,7 @@ import { BottomNav } from "./components/layout/BottomNav";
 import { ToastContainer } from "./components/ui/Toast";
 import { OfflineBanner } from "./components/pwa/OfflineBanner";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
+import { NotificationPrompt } from "./components/notifications/NotificationPrompt";
 import { useAuthStore } from "./stores/authStore";
 
 // Lazy Load Chat Widget (non-critical)
@@ -157,6 +158,7 @@ function App() {
         <ToastContainer />
         <OfflineBanner />
         <InstallPrompt />
+        <NotificationPrompt />
       </div>
     </BrowserRouter>
   );

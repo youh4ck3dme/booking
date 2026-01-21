@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
+import { NotificationSettings } from "../components/notifications/NotificationSettings";
 import {
   Card,
   CardHeader,
@@ -11,7 +12,6 @@ import {
 import {
   Clock,
   Globe,
-  Bell,
   Save,
   Building,
   MapPin,
@@ -200,38 +200,9 @@ export const Settings: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-sm">
-                <Bell size={20} className="text-accent" />
-                Notifikácie a systém
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-md">
-              <div className="flex items-center justify-between p-sm">
-                <div>
-                  <p className="font-medium mb-0">Emailové notifikácie</p>
-                  <p className="text-xs text-secondary">
-                    Posielať potvrdenia o rezerváciách
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-5 h-5 accent-primary"
-                />
-              </div>
-              <div className="flex items-center justify-between p-sm">
-                <div>
-                  <p className="font-medium mb-0">SMS pripomienky</p>
-                  <p className="text-xs text-secondary">
-                    Posielať pripomienku 2h pred termínom
-                  </p>
-                </div>
-                <input type="checkbox" className="w-5 h-5 accent-primary" />
-              </div>
-            </CardContent>
-          </Card>
+
+          {/* Notification Settings */}
+          <NotificationSettings />
 
           <div className="flex justify-end gap-md">
             <Button
