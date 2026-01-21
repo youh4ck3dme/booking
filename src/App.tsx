@@ -6,8 +6,14 @@ import { BottomNav } from "./components/layout/BottomNav";
 import { ToastContainer } from "./components/ui/Toast";
 import { OfflineBanner } from "./components/pwa/OfflineBanner";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
-import { ChatWidget } from "./components/chat/ChatWidget";
 import { useAuthStore } from "./stores/authStore";
+
+// Lazy Load Chat Widget (non-critical)
+const ChatWidget = React.lazy(() =>
+  import("./components/chat/ChatWidget").then((module) => ({
+    default: module.ChatWidget,
+  }))
+);
 
 // Lazy Load Pages
 const Home = React.lazy(() =>
