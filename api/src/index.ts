@@ -46,16 +46,17 @@ app.get('/api/v1/services', async (req, res) => {
         const { data, error } = await supabase.from('services').select('*').order('name');
         if (error) throw error;
         res.json({ data });
-    } catch (err: any) {
-        res.status(500).json({ message: err.message });
+    } catch (err: unknown) {
+        const error = err as Error;
+        res.status(500).json({ message: error.message });
     }
 });
 
 // 2. GET /api/v1/employees
 app.get('/api/v1/employees', async (req, res) => {
     try {
-        const { serviceId } = req.query;
-        let query = supabase.from('employees').select('*').eq('is_active', true);
+        // const { serviceId } = req.query; // TODO: Filter by service when junction table exists
+        const query = supabase.from('employees').select('*').eq('is_active', true);
         
         // Note: Real implementation might filter by service_employees junction table
         // For MVP, we return all active employees
@@ -63,15 +64,17 @@ app.get('/api/v1/employees', async (req, res) => {
         const { data, error } = await query;
         if (error) throw error;
         res.json({ data });
-    } catch (err: any) {
-        res.status(500).json({ message: err.message });
+    } catch (err: unknown) {
+        const error = err as Error;
+        res.status(500).json({ message: error.message });
     }
 });
 
 // 3. GET /api/v1/slots
 app.get('/api/v1/slots', async (req, res) => {
     try {
-        const { date, serviceId, employeeId } = req.query;
+        const { date, serviceId } = req.query;
+        // const { employeeId } = req.query; // TODO: Filter slots by employee
         if (!date || !serviceId) {
              return res.status(400).json({ message: 'Missing date or serviceId' });
         }
@@ -91,8 +94,9 @@ app.get('/api/v1/slots', async (req, res) => {
         ];
         
         res.json({ data: slots });
-    } catch (err: any) {
-        res.status(500).json({ message: err.message });
+    } catch (err: unknown) {
+        const error = err as Error;
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -129,8 +133,9 @@ app.post('/api/v1/bookings', async (req, res) => {
         
         if (error) throw error;
         res.json({ data });
-    } catch (err: any) {
-         res.status(500).json({ message: err.message });
+    } catch (err: unknown) {
+         const error = err as Error;
+         res.status(500).json({ message: error.message });
     }
 });
 
