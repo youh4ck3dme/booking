@@ -57,6 +57,7 @@ export const Header: React.FC = () => {
             size="sm"
             onClick={toggleSidebar}
             className="relative"
+            aria-label="Otvoriť menu"
           >
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">

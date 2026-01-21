@@ -26,11 +26,42 @@ interface SupabaseBooking {
     updated_at: string;
 }
 
+// In-memory storage for demo mode
+const DEMO_BOOKINGS: Booking[] = [
+    {
+        id: 'b1',
+        customerId: 'demo-user',
+        customerName: 'Test Customer',
+        customerEmail: 'demo@bookflow.sk',
+        customerPhone: '+421900111222',
+        employeeId: 'e1',
+        employeeName: 'Alena Smith',
+        serviceId: 's1',
+        serviceName: 'Strih',
+        date: new Date(),
+        startTime: '10:00',
+        endTime: '10:30',
+        duration: 30,
+        price: 15,
+        status: 'confirmed',
+        notes: 'Demo booking',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        locationId: 'demo-location'
+    }
+];
+
 export function useBookings(userId?: string): UseQueryResult<Booking[], Error> {
     return useQuery<Booking[]>({
         queryKey: ['bookings', userId],
         queryFn: async () => {
-            if (isDemoMode) return [];
+             // Return copy to avoid direct ref issues, filter by userId if needed (mock logic)
+            if (isDemoMode) {
+                if (userId) {
+                    return [...DEMO_BOOKINGS].filter(b => b.customerId === userId || b.customerId === 'demo-user'); // diligent mock
+                }
+                return [...DEMO_BOOKINGS];
+            }
 
             let query = supabase.from('bookings').select('*');
             if (userId) {
@@ -59,9 +90,9 @@ export function useBookings(userId?: string): UseQueryResult<Booking[], Error> {
                 notes: b.notes || '',
                 createdAt: new Date(b.created_at),
                 updatedAt: new Date(b.updated_at),
+                locationId: 'default' // Add default if missing in DB mapping
             })) as Booking[];
         },
-        enabled: !isDemoMode,
     });
 }
 
@@ -70,7 +101,59 @@ export function useCreateBooking(): UseMutationResult<SupabaseBooking, Error, { 
     const toast = useToast();
     return useMutation({
         mutationFn: async (data: { formData: BookingFormData; service: Service; userId?: string }) => {
-            if (isDemoMode) throw new Error('Cannot create booking in demo mode');
+            if (!data.formData.employeeId) {
+                throw new Error("Nebol vybraný žiadny zamestnanec.");
+            }
+            if (isDemoMode) {
+                const { formData, service, userId } = data;
+                const startTimeStr = formData.timeSlot;
+                const startDate = parse(startTimeStr, 'HH:mm', formData.date!); // Ensure date exists
+                const endDate = addMinutes(startDate, service.duration);
+                const endTimeStr = format(endDate, 'HH:mm');
+
+                const newBooking: Booking = {
+                    id: 'b' + Math.random().toString(36).substr(2, 9),
+                    customerId: userId || 'guest',
+                    customerName: formData.customerName,
+                    customerEmail: formData.customerEmail,
+                    customerPhone: formData.customerPhone,
+                    employeeId: formData.employeeId!,
+                    employeeName: 'Demo Employee', // Simplified for demo
+                    serviceId: formData.serviceId,
+                    serviceName: service.name,
+                    date: formData.date!,
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    duration: service.duration,
+                    price: service.price,
+                    status: 'pending',
+                    notes: formData.notes || '',
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    locationId: formData.locationId || 'demo-location'
+                };
+                
+                DEMO_BOOKINGS.unshift(newBooking); // Add to beginning
+                
+                // Return as SupabaseBooking to match expected type
+                return {
+                    ...newBooking,
+                    customer_id: newBooking.customerId,
+                    customer_name: newBooking.customerName,
+                    customer_email: newBooking.customerEmail,
+                    customer_phone: newBooking.customerPhone,
+                    employee_id: newBooking.employeeId,
+                    employee_name: newBooking.employeeName,
+                    service_id: newBooking.serviceId,
+                    service_name: newBooking.serviceName,
+                    date: format(newBooking.date, 'yyyy-MM-dd'),
+                    start_time: newBooking.startTime,
+                    end_time: newBooking.endTime,
+                    created_at: newBooking.createdAt.toISOString(),
+                    updated_at: newBooking.updatedAt.toISOString(),
+                    location_id: newBooking.locationId
+                } as unknown as SupabaseBooking;
+            }
 
             const { formData, service, userId } = data;
             const startTimeStr = formData.timeSlot;
@@ -119,7 +202,13 @@ export function useCancelBooking(): UseMutationResult<boolean, Error, string, un
     const toast = useToast();
     return useMutation({
         mutationFn: async (bookingId: string) => {
-            if (isDemoMode) return true;
+            if (isDemoMode) {
+                const index = DEMO_BOOKINGS.findIndex(b => b.id === bookingId);
+                if (index !== -1) {
+                    DEMO_BOOKINGS[index].status = 'cancelled';
+                }
+                return true;
+            }
 
             const { error } = await supabase
                 .from('bookings')
@@ -145,11 +234,12 @@ export function useAvailableSlots(date: Date | null, service: Service | undefine
         queryFn: async () => {
             if (!date || !service || !employees) return [];
             if (isDemoMode) {
-                // Simple demo slots
+                // Return always available slots for demo testing ease
                 return [
                     { id: '1', startTime: parse('09:00', 'HH:mm', date), endTime: parse('09:30', 'HH:mm', date), employeeId: 'e1', isAvailable: true },
-                    { id: '2', startTime: parse('10:00', 'HH:mm', date), endTime: parse('10:30', 'HH:mm', date), employeeId: 'e1', isAvailable: false },
+                    { id: '2', startTime: parse('10:00', 'HH:mm', date), endTime: parse('10:30', 'HH:mm', date), employeeId: 'e1', isAvailable: true },
                     { id: '3', startTime: parse('11:00', 'HH:mm', date), endTime: parse('11:30', 'HH:mm', date), employeeId: 'e1', isAvailable: true },
+                    { id: '4', startTime: parse('12:00', 'HH:mm', date), endTime: parse('12:30', 'HH:mm', date), employeeId: 'e1', isAvailable: true },
                 ];
             }
             return bookingService.getAvailableSlots(date, service, employees);
@@ -163,7 +253,10 @@ export function useBlockTime(): UseMutationResult<boolean | SupabaseBooking, Err
     const toast = useToast();
     return useMutation({
         mutationFn: async (data: { employeeId: string; date: Date; startTime: string; duration: number }) => {
-            if (isDemoMode) return true;
+            if (isDemoMode) {
+                // Mock blocking logic could go here, for now just succeed
+                 return true; 
+            }
 
             const { employeeId, date, startTime, duration } = data;
             const startDate = parse(startTime, 'HH:mm', date);

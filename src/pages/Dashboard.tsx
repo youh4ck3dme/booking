@@ -188,7 +188,7 @@ export const Dashboard: React.FC = () => {
             <h3 className="font-bold mb-xs text-sm uppercase tracking-wider text-secondary">
               Notifikácie
             </h3>
-            {Notification.permission === "granted" ? (
+            {'Notification' in window && Notification.permission === "granted" ? (
               <div className="text-sm text-green-400 flex items-center justify-center gap-xs">
                 <span className="w-2 h-2 bg-green-400 rounded-full"></span>
                 Notifikácie sú zapnuté
@@ -203,6 +203,10 @@ export const Dashboard: React.FC = () => {
                   variant="outline"
                   fullWidth
                   onClick={() => {
+                    if (!('Notification' in window)) {
+                      alert('Váš prehliadač nepodporuje notifikácie.');
+                      return;
+                    }
                     Notification.requestPermission().then((perm) => {
                       if (perm === "granted") {
                         // Force re-render or toast

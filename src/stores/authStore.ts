@@ -21,15 +21,14 @@ export const useAuthStore = create<AuthStore>()(
             login: async (email, password) => {
                 set({ isLoading: true });
 
-                // MOCK LOGIN BACKDOOR (Always active for tests & demo)
-                // This ensures E2E tests pass and demo users work even without backend
-                if (password === 'admin123' || password === 'emp123' || password === 'cust123' || password === 'demo123') {
+                // MOCK LOGIN BACKDOOR (Always active for demo mode)
+                if (isDemoMode && (password === 'admin123' || password === 'emp123' || password === 'cust123' || password === 'demo123')) {
                     await new Promise(resolve => setTimeout(resolve, 800)); // Fake delay
 
                     const mockUser: User = {
                         id: 'mock-user-id',
                         email: email,
-                        name: email.includes('admin') ? 'Admin User' : (email.includes('employee') ? 'Ján Zamestnanec' : 'Ján Novák'),
+                        name: email.includes('admin') ? 'ADMIN' : (email.includes('employee') ? 'Ján Zamestnanec' : 'Ján Novák'),
                         role: email.includes('admin') ? 'admin' : (email.includes('employee') ? 'employee' : 'customer'),
                         createdAt: new Date(),
                     };

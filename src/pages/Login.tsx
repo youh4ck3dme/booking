@@ -49,15 +49,21 @@ export const Login: React.FC = () => {
 
     if (!validate()) return;
 
-    const success = await login(email, password);
+    const success = await login(email, password).catch(() => false);
 
     if (success) {
       toast.success("Prihlásenie úspešné", "Vitajte späť!");
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } else {
       toast.error("Prihlásenie zlyhalo", "Nesprávny email alebo heslo");
     }
   };
+
+  React.useEffect(() => {
+    if (useAuthStore.getState().isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <div className="container py-xl flex items-center justify-center min-h-[calc(100vh-200px)]">

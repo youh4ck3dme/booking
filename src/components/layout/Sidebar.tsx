@@ -13,6 +13,7 @@ import {
   PieChart,
   Moon,
   Sun,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "../ui/Button";
 
@@ -133,10 +134,10 @@ export const Sidebar: React.FC = () => {
                 <motion.div
                   custom={0}
                   variants={itemVariants}
-                  className="bg-background-main p-4 rounded-2xl border border-white/5 shadow-inner"
+                  className="bg-background-main p-6 rounded-2xl border border-white/5 shadow-inner"
                 >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center text-white shadow-lg">
+                  <div className="flex items-center gap-5 mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-primary flex items-center justify-center text-white shadow-xl border border-white/10 ring-4 ring-primary-500/10">
                       {user.avatar ? (
                         <img
                           src={user.avatar}
@@ -150,7 +151,14 @@ export const Sidebar: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg">{user.name}</h3>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <h3 className="font-bold text-lg leading-tight">{user.name}</h3>
+                        {user.role === "admin" && (
+                          <span className="text-[10px] font-bold bg-primary-500/20 text-primary-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            ADMIN
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-text-secondary">
                         {user.email}
                       </p>
@@ -233,6 +241,12 @@ export const Sidebar: React.FC = () => {
                       label="Nastavenia"
                       onClick={() => handleNavigation("/settings")}
                       index={4}
+                    />
+                    <MenuItem
+                      icon={<TrendingUp size={20} />}
+                      label="Štatistiky"
+                      onClick={() => handleNavigation("/statistics")}
+                      index={5}
                     />
                   </>
                 )}

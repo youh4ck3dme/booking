@@ -53,10 +53,13 @@ export function useLocations(userCoords?: { lat: number, lng: number }): UseQuer
             let locations: Location[] = [];
 
             if (isDemoMode) {
-                locations = [...DEMO_LOCATIONS];
-                // Add sample coords for demo sorting if needed
-                if (locations[0]) locations[0].coordinates = { lat: 48.148, lng: 17.107 };
-                if (locations[1]) locations[1].coordinates = { lat: 48.716, lng: 21.261 };
+                // Return fresh copies to avoid polluting constant references across renders/tests
+                locations = DEMO_LOCATIONS.map((loc, idx) => ({
+                    ...loc,
+                    coordinates: idx === 0 ? { lat: 48.148, lng: 17.107 } : 
+                              idx === 1 ? { lat: 48.716, lng: 21.261 } : 
+                              undefined
+                }));
             } else {
                 const { data, error } = await supabase
                     .from('locations')
@@ -91,7 +94,7 @@ export function useLocations(userCoords?: { lat: number, lng: number }): UseQuer
                         };
                     }
                     return loc;
-                }).sort((a, b) => (a.distance || 9999) - (b.distance || 9999));
+                }).sort((a, b) => (a.distance ?? 9999) - (b.distance ?? 9999));
             }
 
             return locations;

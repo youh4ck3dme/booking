@@ -26,7 +26,7 @@ export function useEmployees(locationId?: string): UseQueryResult<Employee[], Er
     return useQuery<Employee[]>({
         queryKey: ['employees', locationId],
         queryFn: async () => {
-            if (isDemoMode) return DEMO_EMPLOYEES;
+            if (isDemoMode) return [...DEMO_EMPLOYEES]; // Return copy to avoid direct ref issues
 
             let query = supabase
                 .from('employees')
@@ -62,7 +62,9 @@ export function useCreateEmployee(): UseMutationResult<Employee, Error, Omit<Emp
         mutationFn: async (newEmployee: Omit<Employee, 'id'>) => {
             if (isDemoMode) {
                 const id = 'e' + Math.random().toString(36).substr(2, 9);
-                return { ...newEmployee, id };
+                const employee = { ...newEmployee, id };
+                DEMO_EMPLOYEES.push(employee);
+                return employee;
             }
 
             const { data, error } = await supabase
@@ -93,7 +95,13 @@ export function useUpdateEmployee(): UseMutationResult<Employee, Error, Employee
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (employee: Employee) => {
-            if (isDemoMode) return employee;
+            if (isDemoMode) {
+                const index = DEMO_EMPLOYEES.findIndex(e => e.id === employee.id);
+                if (index !== -1) {
+                    DEMO_EMPLOYEES[index] = employee;
+                }
+                return employee;
+            }
 
             const { error } = await supabase
                 .from('employees')
@@ -121,7 +129,13 @@ export function useDeleteEmployee(): UseMutationResult<string, Error, string, un
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (id: string) => {
-            if (isDemoMode) return id;
+            if (isDemoMode) {
+                const index = DEMO_EMPLOYEES.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    DEMO_EMPLOYEES.splice(index, 1);
+                }
+                return id;
+            }
 
             const { error } = await supabase
                 .from('employees')

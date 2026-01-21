@@ -43,28 +43,27 @@ describe("StaffManagement page", () => {
     vi.clearAllMocks();
     vi.mocked(useAuthStore).mockReturnValue({
       user: { id: "1", role: "admin" },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as unknown as ReturnType<typeof useAuthStore>);
 
     vi.mocked(useEmployees).mockReturnValue({
       data: mockEmployees,
       isLoading: false,
-    } as any);
+    } as unknown as ReturnType<typeof useEmployees>);
 
     vi.mocked(useCreateEmployee).mockReturnValue({
       isPending: false,
       mutateAsync: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useCreateEmployee>);
 
     vi.mocked(useUpdateEmployee).mockReturnValue({
       isPending: false,
       mutateAsync: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useUpdateEmployee>);
 
     vi.mocked(useDeleteEmployee).mockReturnValue({
       isPending: false,
       mutateAsync: vi.fn(),
-    } as any);
+    } as unknown as ReturnType<typeof useDeleteEmployee>);
   });
 
   it("should render employee list", () => {
@@ -93,8 +92,7 @@ describe("StaffManagement page", () => {
     vi.mocked(useEmployees).mockReturnValue({
       data: undefined,
       isLoading: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    } as unknown as ReturnType<typeof useEmployees>);
 
     render(<StaffManagement />, { wrapper: createWrapper() });
     expect(screen.getByText(/Načítavam/i)).toBeInTheDocument();

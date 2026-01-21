@@ -53,7 +53,7 @@ describe('useAuthStore', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (supabase.auth.signInWithPassword as any).mockResolvedValue({
             data: {
-                user: { id: '1', email: 'admin@bookflow.sk', created_at: new Date().toISOString(), user_metadata: { full_name: 'Admin' } },
+                user: { id: '1', email: 'admin@bookflow.sk', created_at: new Date().toISOString(), user_metadata: { full_name: 'ADMIN' } },
                 session: { access_token: 'fake-token' },
             },
             error: null,
@@ -64,7 +64,7 @@ describe('useAuthStore', () => {
         (supabase.from as any).mockImplementation(() => ({
             select: () => ({
                 eq: () => ({
-                    single: () => Promise.resolve({ data: { role: 'admin', full_name: 'Admin', phone: '123' } }),
+                    single: () => Promise.resolve({ data: { role: 'admin', full_name: 'ADMIN', phone: '123' } }),
                 }),
             }),
         }));
