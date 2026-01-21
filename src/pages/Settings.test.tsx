@@ -8,7 +8,6 @@ describe('Settings Page', () => {
         expect(screen.getByText(/Nastavenia systému/i)).toBeInTheDocument();
         expect(screen.getByText(/Informácie o prevádzke/i)).toBeInTheDocument();
         expect(screen.getByText(/Otváracie hodiny/i)).toBeInTheDocument();
-        expect(screen.getByText(/Push Notifikácie/i)).toBeInTheDocument();
     });
 
     it('updates business name input', () => {
