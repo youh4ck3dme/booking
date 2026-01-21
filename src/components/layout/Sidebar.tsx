@@ -14,6 +14,7 @@ import {
   Moon,
   Sun,
   TrendingUp,
+  MapPin,
 } from "lucide-react";
 import { Button } from "../ui/Button";
 
@@ -250,6 +251,13 @@ export const Sidebar: React.FC = () => {
                       label="Zamestnanci"
                       onClick={() => handleNavigation("/staff")}
                       index={3}
+                    />
+                    <MenuItem
+                      icon={<MapPin size={20} />}
+                      label="Prevádzky"
+                      onClick={() => handleNavigation("/locations")}
+                      index={4}
+                      active={location.pathname === "/locations"}
                     />
                     <MenuItem
                       icon={<Settings size={20} />}

@@ -1,4 +1,4 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, type UseQueryResult, type UseMutationResult } from '@tanstack/react-query';
 import { supabase, isDemoMode } from '../lib/supabase';
 import type { Location } from '../types';
 
@@ -100,5 +100,105 @@ export function useLocations(userCoords?: { lat: number, lng: number }): UseQuer
             return locations;
         },
         staleTime: 1000 * 60 * 6, // 6 minutes
+    });
+}
+
+export function useCreateLocation(): UseMutationResult<Location, Error, Omit<Location, 'id'>, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (newLocation: Omit<Location, 'id'>) => {
+            if (isDemoMode) {
+                const id = 'l' + Math.random().toString(36).substr(2, 9);
+                const location = { ...newLocation, id };
+                DEMO_LOCATIONS.push(location);
+                return location;
+            }
+
+            const { data, error } = await supabase
+                .from('locations')
+                .insert([{
+                    name: newLocation.name,
+                    address: newLocation.address,
+                    phone: newLocation.phone,
+                    email: newLocation.email,
+                    business_hours: newLocation.businessHours,
+                    coordinates: newLocation.coordinates
+                }])
+                .select()
+                .single();
+
+            if (error) throw error;
+            return {
+                id: data.id,
+                name: data.name,
+                address: data.address,
+                phone: data.phone,
+                email: data.email,
+                businessHours: data.business_hours,
+                coordinates: data.coordinates
+            } as Location;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['locations'] });
+        },
+    });
+}
+
+export function useUpdateLocation(): UseMutationResult<Location, Error, Location, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (location: Location) => {
+            if (isDemoMode) {
+                const index = DEMO_LOCATIONS.findIndex(l => l.id === location.id);
+                if (index !== -1) {
+                    DEMO_LOCATIONS[index] = location;
+                }
+                return location;
+            }
+
+            const { error } = await supabase
+                .from('locations')
+                .update({
+                    name: location.name,
+                    address: location.address,
+                    phone: location.phone,
+                    email: location.email,
+                    business_hours: location.businessHours,
+                    coordinates: location.coordinates
+                })
+                .eq('id', location.id);
+
+            if (error) throw error;
+            return location;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['locations'] });
+        },
+    });
+}
+
+export function useDeleteLocation(): UseMutationResult<string, Error, string, unknown> {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            if (isDemoMode) {
+                const index = DEMO_LOCATIONS.findIndex(l => l.id === id);
+                if (index !== -1) {
+                    DEMO_LOCATIONS.splice(index, 1);
+                }
+                return id;
+            }
+
+            const { error } = await supabase
+                .from('locations')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            return id;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['locations'] });
+        },
     });
 }

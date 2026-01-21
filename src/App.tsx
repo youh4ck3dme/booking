@@ -64,6 +64,11 @@ const Analytics = React.lazy(() =>
     default: module.default,
   }))
 );
+const Locations = React.lazy(() =>
+  import("./pages/Locations").then((module) => ({
+    default: module.default,
+  }))
+);
 
 // Loading Component
 const PageLoader = () => (
@@ -157,6 +162,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/locations"
+                element={
+                  <ProtectedRoute>
+                    <Locations />
                   </ProtectedRoute>
                 }
               />
