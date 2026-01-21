@@ -239,6 +239,13 @@ export const Sidebar: React.FC = () => {
                       index={2}
                     />
                     <MenuItem
+                      icon={<TrendingUp size={20} />}
+                      label="Analytika"
+                      onClick={() => handleNavigation("/analytics")}
+                      index={3}
+                      active={location.pathname === "/analytics"}
+                    />
+                    <MenuItem
                       icon={<User size={20} />}
                       label="Zamestnanci"
                       onClick={() => handleNavigation("/staff")}
