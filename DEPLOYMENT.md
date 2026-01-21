@@ -161,8 +161,8 @@ CORS_ORIGINS=https://your-wordpress-site.com,http://localhost:3000
 ### Deploying to Railway/Render/Heroku
 
 1.  **Root Directory**: Set the build root to `api/`.
-2.  **Build Command**: `pnpm install && pnpm build`
-3.  **Start Command**: `pnpm start`
+2.  **Build Command**: `npm install && npm run build`
+3.  **Start Command**: `npm start`
 
 ---
 
