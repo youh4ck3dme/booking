@@ -118,6 +118,10 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# Lock files (project uses pnpm)
+package-lock.json
+yarn.lock
+
 # Visual Studio Code
 .vscode/*
 !.vscode/extensions.json
