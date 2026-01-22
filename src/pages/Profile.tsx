@@ -106,6 +106,43 @@ export const Profile: React.FC = () => {
           </motion.div>
         )}
 
+        <Card className="border-secondary/20 bg-gradient-to-br from-secondary/5 to-transparent overflow-hidden relative">
+             <div className="absolute top-0 right-0 p-lg opacity-10">
+                 <Shield size={120} />
+             </div>
+             <CardHeader>
+                <CardTitle className="flex items-center gap-sm text-secondary">
+                    <Shield size={24} />
+                    Vernostný program
+                </CardTitle>
+             </CardHeader>
+             <CardContent className="relative z-10">
+                 <div className="flex flex-col md:flex-row justify-between items-center gap-lg">
+                     <div className="text-center md:text-left">
+                         <div className="text-4xl font-bold text-primary mb-xs">{user?.points || 0} bodov</div>
+                         <div className="text-sm text-muted">Získajte 1 bod za každé zaplatené 1 €</div>
+                     </div>
+                     
+                     <div className="flex-1 w-full max-w-xs">
+                         <div className="flex justify-between text-xs font-bold uppercase tracking-wider mb-xs text-secondary-300">
+                             <span>Bronze</span>
+                             <span>Silver</span>
+                         </div>
+                         <div className="h-3 bg-white/10 rounded-full overflow-hidden">
+                             <motion.div 
+                                className="h-full bg-gradient-to-r from-secondary-dark to-secondary"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min(((user?.points || 0) / 500) * 100, 100)}%` }}
+                             />
+                         </div>
+                         <div className="text-right mt-xs text-xs text-muted">
+                            {500 - (user?.points || 0)} bodov do Silver úrovne
+                         </div>
+                     </div>
+                 </div>
+             </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-sm">

@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../stores/authStore";
 import { format } from "date-fns";
 import { sk } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { EmptyState } from "../components/ui/EmptyState";
+import { ReviewModal } from "../components/reviews/ReviewModal";
+import { PaymentService } from "../services/paymentService";
+import { useToast } from "../hooks/useToast";
 import {
   Calendar,
   Clock,
@@ -14,14 +18,20 @@ import {
   RefreshCw,
   Star,
   Inbox,
+  CreditCard,
 } from "lucide-react";
 import { useBookings, useCancelBooking } from "../hooks/useBookings";
 import type { Booking } from "../types";
 
 export const MyBookings: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const toast = useToast();
   const { data: bookings = [], isLoading } = useBookings(user?.id);
   const cancelMutation = useCancelBooking();
+  
+  const [selectedBookingForReview, setSelectedBookingForReview] = useState<Booking | null>(null);
+  const [isPaying, setIsPaying] = useState<string | null>(null);
 
   const upcomingBookings = bookings.filter(
     (b) => new Date(b.date) >= new Date() && b.status !== "cancelled"
@@ -35,10 +45,33 @@ export const MyBookings: React.FC = () => {
     if (confirm("Naozaj chcete zrušiť túto rezerváciu?")) {
       try {
         await cancelMutation.mutateAsync(id);
-      } catch (error) {
-        console.error("Cancellation failed:", error);
+      } catch {
+        // toast handled in hook or global
       }
     }
+  };
+
+  const handlePay = async (booking: Booking) => {
+      setIsPaying(booking.id);
+      try {
+          const { redirectUrl } = await PaymentService.initiatePayment(booking.id, booking.price, user?.email || '');
+          if (redirectUrl) {
+              window.location.href = redirectUrl;
+          } else {
+              toast.success("Platba úspešná", "Rezervácia bola zaplatená.");
+              useAuthStore.getState().addPoints(booking.price); // Award points for payment
+              toast.success("Gratulujeme!", `Získali ste ${booking.price} vernostných bodov!`);
+              // Optimistic update for demo purposes
+              booking.paymentStatus = 'paid'; 
+              // Force re-render if needed, or invalidate query
+              // queryClient.invalidateQueries(['bookings']) (would need useQueryClient)
+          }
+      } catch (error) {
+          console.error("Payment failed", error);
+          toast.error("Chyba platby", "Nepodarilo sa iniciovať platbu.");
+      } finally {
+          setIsPaying(null);
+      }
   };
 
   const BookingItem = ({
@@ -69,6 +102,17 @@ export const MyBookings: React.FC = () => {
               {booking.serviceName} s {booking.employeeName}
             </span>
           </div>
+           {booking.price > 0 && (
+              <div className="flex items-center gap-sm text-secondary font-mono text-sm">
+                  <CreditCard size={14} />
+                  <span>{booking.price} €</span>
+                  {booking.paymentStatus === 'paid' ? (
+                      <span className="text-green-500 font-bold ml-xs">(Zaplatené)</span>
+                  ) : (
+                      <span className="text-yellow-500 font-bold ml-xs">(Nezaplatené)</span>
+                  )}
+              </div>
+          )}
         </div>
 
         <div className="flex flex-col items-end gap-sm">
@@ -87,27 +131,41 @@ export const MyBookings: React.FC = () => {
               ? "Čaká na potvrdenie"
               : "Zrušené"}
           </div>
+          
           {isUpcoming && booking.status !== "cancelled" && (
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
-              onClick={() => handleCancel(booking.id)}
-              isLoading={
-                cancelMutation.isPending &&
-                cancelMutation.variables === booking.id
-              }
-            >
-              <XCircle size={16} className="mr-xs" />
-              Zrušiť
-            </Button>
+            <div className="flex gap-sm">
+                 {booking.paymentStatus !== 'paid' && (
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handlePay(booking)}
+                        isLoading={isPaying === booking.id}
+                    >
+                        <CreditCard size={16} className="mr-xs" />
+                        Zaplatiť
+                    </Button>
+                )}
+                <Button
+                variant="secondary"
+                size="sm"
+                className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30"
+                onClick={() => handleCancel(booking.id)}
+                isLoading={
+                    cancelMutation.isPending &&
+                    cancelMutation.variables === booking.id
+                }
+                >
+                <XCircle size={16} className="mr-xs" />
+                Zrušiť
+                </Button>
+            </div>
           )}
-          {!isUpcoming && booking.status === "confirmed" && (
+          {!isUpcoming && (booking.status === "confirmed" || booking.status === "completed") && (
             <div className="flex gap-sm">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => alert("Ďakujeme za hodnotenie!")}
+                onClick={() => setSelectedBookingForReview(booking)}
               >
                 <Star size={16} className="mr-xs text-yellow-400" />
                 Ohodnotiť
@@ -115,7 +173,7 @@ export const MyBookings: React.FC = () => {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => (window.location.href = "/book")}
+                onClick={() => navigate("/book")}
               >
                 <RefreshCw size={16} className="mr-xs" />
                 Znovu objednať
@@ -146,7 +204,7 @@ export const MyBookings: React.FC = () => {
             description="Tu uvidíte všetky vaše nadchádzajúce a minulé rezervácie. Začnite výberom služby."
             icon={Inbox}
             actionLabel="Vytvoriť prvú rezerváciu"
-            onAction={() => (window.location.href = "/book")}
+            onAction={() => navigate("/book")}
           />
         ) : (
           <div className="space-y-xl">
@@ -198,6 +256,14 @@ export const MyBookings: React.FC = () => {
           </div>
         )}
       </motion.div>
+
+      {selectedBookingForReview && (
+        <ReviewModal
+            isOpen={!!selectedBookingForReview}
+            onClose={() => setSelectedBookingForReview(null)}
+            booking={selectedBookingForReview}
+        />
+      )}
     </div>
   );
 };

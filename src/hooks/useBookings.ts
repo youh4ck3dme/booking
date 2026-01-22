@@ -44,6 +44,7 @@ const DEMO_BOOKINGS: Booking[] = [
         duration: 30,
         price: 15,
         status: 'confirmed',
+        paymentStatus: 'pending',
         notes: 'Demo booking',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -87,6 +88,7 @@ export function useBookings(userId?: string): UseQueryResult<Booking[], Error> {
                 duration: b.duration,
                 price: b.price,
                 status: b.status,
+                paymentStatus: 'pending', // Default for now until DB field is confirmed/migrated
                 notes: b.notes || '',
                 createdAt: new Date(b.created_at),
                 updatedAt: new Date(b.updated_at),
@@ -185,15 +187,87 @@ export function useCreateBooking(): UseMutationResult<SupabaseBooking, Error, { 
                 .single();
 
             if (error) throw error;
-            return inserted as SupabaseBooking;
+            // Match Supabase return type
+            return inserted as SupabaseBooking; 
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
-            toast.success('Rezervácia bola úspešne vytvorená!');
+            toast.success('Rezervácia vytvorená', 'Vaša rezervácia bola úspešne prijatá.');
+            
+            // Scheduling notification (mocked for now as we don't have the notification service imported here directly to avoid cycles if any, 
+            // but normally we would call notificationService.scheduleBookingReminder here or in component)
         },
-        onError: (error: Error) => {
-            toast.error('Chyba pri vytváraní rezervácie', error.message);
+        onError: (error) => {
+             toast.error('Chyba', error.message || 'Nepodarilo sa vytvoriť rezerváciu.');
+        }
+    });
+}
+
+export function useUpdateBooking(): UseMutationResult<Booking, Error, Partial<Booking> & { id: string }, unknown> {
+    const queryClient = useQueryClient();
+    const toast = useToast();
+
+    return useMutation({
+        mutationFn: async (bookingUpdate: Partial<Booking> & { id: string }) => {
+            if (isDemoMode) {
+                const index = DEMO_BOOKINGS.findIndex(b => b.id === bookingUpdate.id);
+                if (index !== -1) {
+                    const updatedBooking = { ...DEMO_BOOKINGS[index], ...bookingUpdate, updatedAt: new Date() };
+                    DEMO_BOOKINGS[index] = updatedBooking;
+                    return updatedBooking;
+                }
+                throw new Error("Booking not found");
+            }
+
+            // Map frontend naming to DB naming
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const dbUpdate: any = { updated_at: new Date() };
+            if (bookingUpdate.date) dbUpdate.date = format(bookingUpdate.date, 'yyyy-MM-dd');
+            if (bookingUpdate.startTime) dbUpdate.start_time = bookingUpdate.startTime;
+            if (bookingUpdate.endTime) dbUpdate.end_time = bookingUpdate.endTime;
+            if (bookingUpdate.status) dbUpdate.status = bookingUpdate.status;
+            if (bookingUpdate.notes) dbUpdate.notes = bookingUpdate.notes;
+            if (bookingUpdate.employeeId) dbUpdate.employee_id = bookingUpdate.employeeId;
+            if (bookingUpdate.serviceId) dbUpdate.service_id = bookingUpdate.serviceId;
+
+            const { data, error } = await supabase
+                .from('bookings')
+                .update(dbUpdate)
+                .eq('id', bookingUpdate.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            
+             return {
+                id: data.id,
+                customerId: data.customer_id || '',
+                customerName: data.customer_name,
+                customerEmail: data.customer_email,
+                customerPhone: data.customer_phone,
+                employeeId: data.employee_id,
+                employeeName: data.employee_name || 'Zamestnanec',
+                serviceId: data.service_id,
+                serviceName: data.service_name || 'Služba',
+                date: new Date(data.date),
+                startTime: data.start_time,
+                endTime: data.end_time,
+                duration: data.duration,
+                price: data.price,
+                status: data.status,
+                notes: data.notes || '',
+                createdAt: new Date(data.created_at),
+                updatedAt: new Date(data.updated_at),
+                locationId: 'default' 
+            } as Booking;
         },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['bookings'] });
+            toast.success('Rezervácia upravená', 'Zmeny boli úspešne uložené.');
+        },
+        onError: () => {
+            toast.error('Chyba', 'Nepodarilo sa upraviť rezerváciu.');
+        }
     });
 }
 

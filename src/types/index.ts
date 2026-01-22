@@ -10,6 +10,7 @@ export interface User {
   phone?: string;
   role: UserRole;
   avatar?: string;
+  points?: number; // Loyalty points
   createdAt: Date;
 }
 
@@ -45,6 +46,12 @@ export interface Service {
   color: string;
   icon?: string;
   locationId?: string;
+  imageUrl?: string;
+  employeeIds?: string[];
+  // Deposit Configuration
+  requireDeposit?: boolean;
+  depositAmount?: number; // If fixed amount
+  depositPercentage?: number; // If percentage (e.g. 20 for 20%)
 }
 
 export interface Employee {
@@ -72,6 +79,24 @@ export interface TimeSlot {
   isAvailable: boolean;
 }
 
+export interface Review {
+  id: string;
+  bookingId: string;
+  customerId: string;
+  customerName: string; // duplicate for display ease
+  employeeId: string;
+  serviceId: string;
+  rating: number; // 1-5
+  comment: string;
+  createdAt: Date;
+}
+
+export interface Favorite {
+  id: string;
+  customerId: string;
+  employeeId: string;
+}
+
 export interface Booking {
   id: string;
   customerId: string;
@@ -82,19 +107,36 @@ export interface Booking {
   employeeName: string;
   serviceId: string;
   serviceName: string;
-  locationId: string;
+  locationId?: string;
   date: Date;
   startTime: string;
   endTime: string;
   duration: number;
   price: number;
   status: BookingStatus;
+  paymentStatus?: PaymentStatus;
+  // Payment Details
+  depositPaid?: number;
+  
   notes?: string;
+  reviewId?: string; // Optional link to a review
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no-show';
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+
+export interface Payment {
+  id: string;
+  bookingId: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  provider: 'sumup' | 'cash';
+  transactionId?: string;
+  createdAt: Date;
+}
 
 // Booking Form Types
 export interface BookingFormData {

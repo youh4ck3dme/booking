@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { MonthlyCalendar } from '../components/calendar/MonthlyCalendar';
+import { DailyCalendar } from '../components/calendar/DailyCalendar';
+import { BookingCalendarGrid } from '../components/calendar/enhanced/BookingCalendarGrid';
+import { EnhancedWeeklyCalendar } from '../components/calendar/enhanced/EnhancedWeeklyCalendar';
+import { CalendarBookingModal } from '../components/calendar/enhanced/CalendarBookingModal';
 import { useBookings } from '../hooks/useBookings';
 import { useAuthStore } from '../stores/authStore';
 import { motion } from 'framer-motion';
@@ -12,16 +15,19 @@ export const Calendar: React.FC = () => {
   const { user } = useAuthStore();
   const { data: bookings = [], isLoading } = useBookings(user?.role === 'admin' ? undefined : user?.id);
   const [viewMode, setViewMode] = useState<ViewMode>('month');
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-
-  const handleDateClick = (date: Date) => {
-    console.log('Date clicked:', date);
-    // TODO: Open booking creation modal for this date
-  };
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const handleBookingClick = (booking: Booking) => {
     setSelectedBooking(booking);
     // TODO: Open booking details modal
+  };
+
+  const handleDayClick = (date: Date) => {
+    setSelectedDate(date);
+    setBookingModalOpen(true);
   };
 
   if (isLoading) {
@@ -71,7 +77,6 @@ export const Calendar: React.FC = () => {
                 px-md py-sm rounded flex items-center gap-xs transition-all
                 ${viewMode === 'week' ? 'bg-primary text-white' : 'text-secondary hover:text-primary'}
               `}
-              disabled
             >
               <List size={18} />
               <span className="hidden sm:inline">Týždeň</span>
@@ -82,7 +87,6 @@ export const Calendar: React.FC = () => {
                 px-md py-sm rounded flex items-center gap-xs transition-all
                 ${viewMode === 'day' ? 'bg-primary text-white' : 'text-secondary hover:text-primary'}
               `}
-              disabled
             >
               <CalendarIcon size={18} />
               <span className="hidden sm:inline">Deň</span>
@@ -98,21 +102,32 @@ export const Calendar: React.FC = () => {
         transition={{ delay: 0.1 }}
       >
         {viewMode === 'month' && (
-          <MonthlyCalendar
+          <BookingCalendarGrid
+            month={currentDate.getMonth()}
+            year={currentDate.getFullYear()}
             bookings={bookings}
-            onDateClick={handleDateClick}
             onBookingClick={handleBookingClick}
+            onDayClick={handleDayClick}
+            userRole={user?.role}
           />
         )}
         {viewMode === 'week' && (
-          <div className="glass-card p-xl text-center">
-            <p className="text-secondary">Týždenný pohľad bude dostupný v budúcej verzii</p>
-          </div>
+          <EnhancedWeeklyCalendar
+            bookings={bookings}
+            currentDate={currentDate}
+            onDateChange={setCurrentDate}
+            onBookingClick={handleBookingClick}
+            onDayClick={handleDayClick}
+            userRole={user?.role}
+          />
         )}
         {viewMode === 'day' && (
-          <div className="glass-card p-xl text-center">
-            <p className="text-secondary">Denný pohľad bude dostupný v budúcej verzii</p>
-          </div>
+          <DailyCalendar
+            bookings={bookings}
+            currentDate={currentDate}
+            onDateChange={setCurrentDate}
+            onBookingClick={handleBookingClick}
+          />
         )}
       </motion.div>
 
@@ -140,6 +155,13 @@ export const Calendar: React.FC = () => {
           </motion.div>
         </div>
       )}
+
+      {/* Calendar Booking Modal */}
+      <CalendarBookingModal
+        isOpen={bookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+        selectedDate={selectedDate}
+      />
     </div>
   );
 };

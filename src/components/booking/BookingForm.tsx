@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -27,6 +28,8 @@ import { LocationStep } from "./LocationStep";
 import { useServices } from "../../hooks/useServices";
 import { useEmployees } from "../../hooks/useEmployees";
 import { useAvailableSlots, useCreateBooking } from "../../hooks/useBookings";
+import { PaymentService } from "../../services/paymentService";
+import { useToast } from "../../hooks/useToast";
 import { format } from "date-fns";
 import { sk } from "date-fns/locale";
 
@@ -50,6 +53,8 @@ export const BookingForm: React.FC = () => {
   } = useBookingStore();
 
   const { user } = useAuthStore();
+  const toast = useToast();
+  // const navigate = useNavigate(); // Removed unused for now
 
   // TanStack Query Hooks with Location filtering
   const { data: services = [], isLoading: isServicesLoading } = useServices(
@@ -69,6 +74,16 @@ export const BookingForm: React.FC = () => {
 
   const createBookingMutation = useCreateBooking();
 
+  const getDepositRequired = () => {
+    if (!selectedService?.requireDeposit) return 0;
+    if (selectedService.depositAmount) return selectedService.depositAmount;
+    if (selectedService.depositPercentage) return (selectedService.price * selectedService.depositPercentage) / 100;
+    return 0;
+  };
+
+  const depositAmount = getDepositRequired();
+  const isDepositRequired = depositAmount > 0;
+
   // Auto-fill user data if logged in
   useEffect(() => {
     if (user && !formData.customerEmail) {
@@ -84,12 +99,34 @@ export const BookingForm: React.FC = () => {
     if (!selectedService) return;
 
     try {
-      await createBookingMutation.mutateAsync({
+      const booking = await createBookingMutation.mutateAsync({
         formData,
         service: selectedService,
         userId: user?.id,
       });
-      nextStep(); // Move to success step
+
+      if (isDepositRequired) {
+          try {
+             toast.info("Prebieha platba zálohy...");
+             const { redirectUrl } = await PaymentService.initiatePayment(booking.id, depositAmount, user?.email || formData.customerEmail || '');
+             if (redirectUrl) {
+                 window.location.href = redirectUrl;
+                 return; // Redirecting away
+             } else {
+                 // Success without redirect (demo)
+                 toast.success("Záloha uhradená", "Rezervácia potvrdená.");
+                 useAuthStore.getState().addPoints(depositAmount); // Award points for deposit
+                 toast.success("Gratulujeme!", `Získali ste ${depositAmount} vernostných bodov!`);
+                 nextStep();
+             }
+          } catch (err) {
+              console.error(err);
+              toast.error("Chyba platby", "Nepodarilo sa uhradiť zálohu.");
+              // Stay on confirmation step or handle error state
+          }
+      } else {
+          nextStep(); // Move to success step
+      }
     } catch (error) {
       console.error("Booking failed:", error);
     }
@@ -400,11 +437,23 @@ export const BookingForm: React.FC = () => {
                   <span>{selectedService?.duration} min</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-md">
-                  <span className="text-secondary">Cena</span>
                   <span className="font-bold text-xl text-primary">
                     {selectedService?.price}€
                   </span>
                 </div>
+                
+                {isDepositRequired && (
+                    <div className="bg-primary/5 p-sm rounded-md border border-primary/20 mt-xs">
+                        <div className="flex justify-between items-center text-primary font-bold">
+                            <span>Záloha na úhradu (Teraz):</span>
+                            <span>{depositAmount} €</span>
+                        </div>
+                        <div className="flex justify-between items-center text-secondary text-sm mt-xs">
+                            <span>Doplatok na mieste:</span>
+                            <span>{selectedService ? selectedService.price - depositAmount : 0} €</span>
+                        </div>
+                    </div>
+                )}
 
                 <div className="bg-white/5 p-md rounded-md mt-md">
                   <h5 className="font-bold mb-xs text-sm text-secondary">
@@ -552,9 +601,9 @@ export const BookingForm: React.FC = () => {
               size="lg"
               className="px-xl"
               isLoading={createBookingMutation.isPending}
-              rightIcon={<Check size={20} />}
+              rightIcon={isDepositRequired ? <Sparkles size={20} /> : <Check size={20} />}
             >
-              Potvrdiť rezerváciu
+              {isDepositRequired ? `Uhradiť zálohu ${depositAmount} €` : 'Potvrdiť rezerváciu'}
             </Button>
           ) : (
             <Button

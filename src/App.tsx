@@ -69,6 +69,11 @@ const Locations = React.lazy(() =>
     default: module.default,
   }))
 );
+const Favorites = React.lazy(() =>
+  import("./pages/Favorites").then((module) => ({
+    default: module.default,
+  }))
+);
 
 // Loading Component
 const PageLoader = () => (
@@ -158,7 +163,15 @@ function App() {
                 }
               />
               <Route
-                path="/analytics"
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <Favorites />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics"
                 element={
                   <ProtectedRoute>
                     <Analytics />

@@ -36,7 +36,10 @@ const apiKeyMiddleware = (req: express.Request, res: express.Response, next: exp
     next();
 };
 
+import paymentRoutes from './routes/payments';
+
 app.use('/api/v1', apiKeyMiddleware);
+app.use('/api/v1/payments', paymentRoutes);
 
 // Routes
 

@@ -8,6 +8,7 @@ interface AuthStore extends AuthState {
     register: (name: string, email: string, password: string) => Promise<boolean>;
     logout: () => void;
     updateUser: (user: Partial<User>) => Promise<void>;
+    addPoints: (amount: number) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -31,6 +32,7 @@ export const useAuthStore = create<AuthStore>()(
                         name: email.includes('admin') ? 'ADMIN' : (email.includes('employee') ? 'Ján Zamestnanec' : 'Ján Novák'),
                         role: email.includes('admin') ? 'admin' : (email.includes('employee') ? 'employee' : 'customer'),
                         createdAt: new Date(),
+                        points: 0,
                     };
 
                     set({
@@ -154,6 +156,32 @@ export const useAuthStore = create<AuthStore>()(
                     console.error('Update user error:', err);
                 }
             },
+            
+            addPoints: async (amount: number) => {
+                const { user } = get();
+                if (!user) return;
+                
+                const newPoints = (user.points || 0) + amount;
+                
+                if (isDemoMode) {
+                    set({ user: { ...user, points: newPoints } });
+                    return;
+                }
+                
+                try {
+                    // Assuming 'points' column exists in profiles or a separate loyalty table
+                    const { error } = await supabase
+                        .from('profiles')
+                        .update({ points: newPoints })
+                        .eq('id', user.id);
+                        
+                    if (!error) {
+                         set({ user: { ...user, points: newPoints } });
+                    }
+                } catch(e) {
+                    console.error("Failed to add points", e);
+                }
+            }
         }),
         {
             name: 'bookflow-auth',
