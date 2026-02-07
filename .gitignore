@@ -131,6 +131,7 @@ dist
 # Vite / PWA
 dist/
 dist-ssr/
+dev-dist/
 *.local
 
 # Supabase
