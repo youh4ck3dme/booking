@@ -144,3 +144,7 @@ blob-report/
 
 # Antigravity / Gemini
 .gemini/
+
+# Project Specific
+skin-export-*.json
+docs/supabase-env.md
