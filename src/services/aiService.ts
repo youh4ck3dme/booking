@@ -31,8 +31,16 @@ export const processAIResponse = async (text: string): Promise<AIResponse> => {
         return { content: responses.greeting[Math.floor(Math.random() * responses.greeting.length)] };
     }
 
+    // Info Intent (Check BEFORE booking to catch "rezerváciu" in "mám rezerváciu")
+    if (lowerText.includes('kedy') || lowerText.includes('mám') || lowerText.includes('mam') || lowerText.includes('info')) {
+        return {
+            content: responses.info[0],
+            actions: [{ type: 'info', label: 'Zobraziť profil' }]
+        };
+    }
+
     // Booking Intent
-    if (lowerText.includes('rezerv') || lowerText.includes('objedna') || lowerText.includes('termin')) {
+    if (lowerText.includes('rezerv') || lowerText.includes('objedna') || lowerText.includes('termín') || lowerText.includes('termin')) {
         return {
             content: responses.booking[Math.floor(Math.random() * responses.booking.length)],
             actions: [{ type: 'book', label: 'Otvoriť rezerváciu' }]
@@ -40,23 +48,15 @@ export const processAIResponse = async (text: string): Promise<AIResponse> => {
     }
 
     // Pricing Intent
-    if (lowerText.includes('cena') || lowerText.includes('kolko') || lowerText.includes('cennik')) {
+    if (lowerText.includes('cena') || lowerText.includes('koľko') || lowerText.includes('kolko') || lowerText.includes('cenník') || lowerText.includes('cennik')) {
         return { content: responses.pricing[0] };
     }
 
     // Reschedule Intent
-    if (lowerText.includes('zmeni') || lowerText.includes('presun')) {
+    if (lowerText.includes('zmeniť') || lowerText.includes('zmeni') || lowerText.includes('presun')) {
         return {
             content: responses.reschedule[0],
             actions: [{ type: 'reschedule', label: 'Moje rezervácie' }]
-        };
-    }
-
-    // Info Intent
-    if (lowerText.includes('kedy') || lowerText.includes('mam') || lowerText.includes('info')) {
-        return {
-            content: responses.info[0],
-            actions: [{ type: 'info', label: 'Zobraziť profil' }]
         };
     }
 
