@@ -13,7 +13,8 @@ echo "🚀 Starting Production Launch Sequence..."
 
 # 1. Supabase Link
 echo "🔗 Linking Supabase Project: $SUPABASE_PROJECT_REF..."
-supabase link --project-ref "$SUPABASE_PROJECT_REF" --non-interactive || { echo "❌ Supabase link failed"; exit 1; }
+# Note: This might require entering the database password
+supabase link --project-ref "$SUPABASE_PROJECT_REF" || { echo "❌ Supabase link failed"; exit 1; }
 
 # 2. Database Push (Schema + RLS)
 echo "💾 Pushing Database Schema..."
