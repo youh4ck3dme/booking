@@ -58,7 +58,7 @@ class BookFlow_Locations
             'exclude_from_search'   => true,
             'publicly_queryable'    => false,
             'capability_type'       => 'post',
-            'show_in_rest'          => false,
+            'show_in_rest'          => true,
         );
 
         register_post_type('bf_location', $args);
@@ -192,7 +192,7 @@ class BookFlow_Locations
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
 
         $post = get_post($post_id);
-        if ($post->post_status !== 'publish') return;
+        if (!$post || $post->post_status !== 'publish') return;
 
         $address = get_post_meta($post_id, '_bf_address', true);
         $phone = get_post_meta($post_id, '_bf_phone', true);
@@ -208,7 +208,7 @@ class BookFlow_Locations
 
         $location_data = array(
             'id' => $api_id,
-            'name' => $post->post_title,
+            'name' => $post ? $post->post_title : 'Unknown Location',
             'address' => $address,
             'phone' => $phone,
             'email' => $email,

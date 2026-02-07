@@ -57,7 +57,7 @@ describe("BookingForm Integration", () => {
 
     // BookingForm should render its container
     expect(
-      container.querySelector('.booking-form, [class*="booking"]')
+      container.querySelector('[data-testid="booking-form"]')
     ).toBeTruthy();
   });
 

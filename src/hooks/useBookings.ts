@@ -1,67 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase, isDemoMode } from '../lib/supabase';
-import type { Booking, BookingFormData, Service, Employee, TimeSlot, BookingStatus } from '../types';
+import type { Booking, BookingFormData, Service, Employee, TimeSlot } from '../types';
 import { format, parse, addMinutes } from 'date-fns';
 import { useToast } from './useToast';
 import { bookingService } from '../services/bookingService';
-
-interface SupabaseBooking {
-    id: string;
-    customer_id: string | null;
-    customer_name: string;
-    customer_email: string;
-    customer_phone: string;
-    employee_id: string;
-    employee_name: string;
-    service_id: string;
-    service_name: string;
-    date: string;
-    start_time: string;
-    end_time: string;
-    duration: number;
-    price: number;
-    status: BookingStatus;
-    notes: string | null;
-    created_at: string;
-    updated_at: string;
-}
 
 export function useBookings(userId?: string) {
     return useQuery<Booking[]>({
         queryKey: ['bookings', userId],
         queryFn: async () => {
-            if (isDemoMode) return [];
-
-            let query = supabase.from('bookings').select('*');
+            const allBookings: Booking[] = JSON.parse(localStorage.getItem('bf_bookings') || '[]');
             if (userId) {
-                query = query.eq('customer_id', userId);
+                return allBookings.filter(b => b.customerId === userId).sort((a, b) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
             }
-
-            const { data, error } = await query.order('date', { ascending: false });
-            if (error) throw error;
-
-            return (data as SupabaseBooking[]).map(b => ({
-                id: b.id,
-                customerId: b.customer_id || '',
-                customerName: b.customer_name,
-                customerEmail: b.customer_email,
-                customerPhone: b.customer_phone,
-                employeeId: b.employee_id,
-                employeeName: b.employee_name || 'Zamestnanec',
-                serviceId: b.service_id,
-                serviceName: b.service_name || 'Služba',
-                date: new Date(b.date),
-                startTime: b.start_time,
-                endTime: b.end_time,
-                duration: b.duration,
-                price: b.price,
-                status: b.status,
-                notes: b.notes || '',
-                createdAt: new Date(b.created_at),
-                updatedAt: new Date(b.updated_at),
-            })) as Booking[];
+            return allBookings.sort((a, b) =>
+                new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
         },
-        enabled: !isDemoMode,
     });
 }
 
@@ -71,39 +27,39 @@ export function useCreateBooking() {
 
     return useMutation({
         mutationFn: async (data: { formData: BookingFormData; service: Service; userId?: string }) => {
-            if (isDemoMode) throw new Error('Cannot create booking in demo mode');
-
             const { formData, service, userId } = data;
+
             const startTimeStr = formData.timeSlot;
-            const startDate = parse(startTimeStr, 'HH:mm', formData.date!);
+            if (!startTimeStr || !formData.date) {
+                throw new Error('Chýba čas alebo dátum rezervácie');
+            }
+
+            const baseDate = new Date(formData.date);
+            if (isNaN(baseDate.getTime())) throw new Error('Neplatný dátum');
+
+            const startDate = parse(startTimeStr, 'HH:mm', baseDate);
+            if (isNaN(startDate.getTime())) throw new Error('Neplatný čas');
+
             const endDate = addMinutes(startDate, service.duration);
             const endTimeStr = format(endDate, 'HH:mm');
 
-            const dbBooking = {
-                customer_id: userId,
-                customer_name: formData.customerName,
-                customer_email: formData.customerEmail,
-                customer_phone: formData.customerPhone,
-                employee_id: formData.employeeId,
-                service_id: formData.serviceId,
-                date: format(formData.date!, 'yyyy-MM-dd'),
-                start_time: startTimeStr,
-                end_time: endTimeStr,
+            return bookingService.createBooking({
+                customerId: userId || 'guest-' + Math.random().toString(36).substr(2, 5),
+                customerName: formData.customerName,
+                customerEmail: formData.customerEmail,
+                customerPhone: formData.customerPhone,
+                employeeId: formData.employeeId || 'any',
+                employeeName: 'Zamestnanec', // Fallback, could be refined
+                serviceId: formData.serviceId,
+                serviceName: service.name,
+                locationId: formData.locationId,
+                date: formData.date!,
+                startTime: startTimeStr,
+                endTime: endTimeStr,
                 duration: service.duration,
                 price: service.price,
-                status: 'pending',
                 notes: formData.notes,
-                location_id: formData.locationId,
-            };
-
-            const { data: inserted, error } = await supabase
-                .from('bookings')
-                .insert(dbBooking)
-                .select()
-                .single();
-
-            if (error) throw error;
-            return inserted as SupabaseBooking;
+            });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bookings'] });
@@ -121,14 +77,9 @@ export function useCancelBooking() {
 
     return useMutation({
         mutationFn: async (bookingId: string) => {
-            if (isDemoMode) return true;
-
-            const { error } = await supabase
-                .from('bookings')
-                .update({ status: 'cancelled' })
-                .eq('id', bookingId);
-
-            if (error) throw error;
+            const allBookings: Booking[] = JSON.parse(localStorage.getItem('bf_bookings') || '[]');
+            const updated = allBookings.map(b => b.id === bookingId ? { ...b, status: 'cancelled' as const } : b);
+            localStorage.setItem('bf_bookings', JSON.stringify(updated));
             return true;
         },
         onSuccess: () => {
@@ -146,56 +97,41 @@ export function useAvailableSlots(date: Date | null, service: Service | undefine
         queryKey: ['slots', date ? format(date, 'yyyy-MM-dd') : null, service?.id, employees?.length],
         queryFn: async () => {
             if (!date || !service || !employees) return [];
-            if (isDemoMode) {
-                // Simple demo slots
-                return [
-                    { id: '1', startTime: parse('09:00', 'HH:mm', date), endTime: parse('09:30', 'HH:mm', date), employeeId: 'e1', isAvailable: true },
-                    { id: '2', startTime: parse('10:00', 'HH:mm', date), endTime: parse('10:30', 'HH:mm', date), employeeId: 'e1', isAvailable: false },
-                    { id: '3', startTime: parse('11:00', 'HH:mm', date), endTime: parse('11:30', 'HH:mm', date), employeeId: 'e1', isAvailable: true },
-                ];
-            }
             return bookingService.getAvailableSlots(date, service, employees);
         },
         enabled: !!date && !!service && !!employees,
         staleTime: 1000 * 30, // 30 seconds
     });
 }
+
 export function useBlockTime() {
     const queryClient = useQueryClient();
     const toast = useToast();
 
     return useMutation({
         mutationFn: async (data: { employeeId: string; date: Date; startTime: string; duration: number }) => {
-            if (isDemoMode) return true;
-
             const { employeeId, date, startTime, duration } = data;
             const startDate = parse(startTime, 'HH:mm', date);
             const endDate = addMinutes(startDate, duration);
             const endTimeStr = format(endDate, 'HH:mm');
 
-            const dbBooking = {
-                customer_name: 'BLOKOVANÉ',
-                customer_email: 'blocked@bookflow.sk',
-                customer_phone: '',
-                employee_id: employeeId,
-                service_id: 'blocked', // Placeholder for blocked time
-                date: format(date, 'yyyy-MM-dd'),
-                start_time: startTime,
-                end_time: endTimeStr,
+            return bookingService.createBooking({
+                customerId: 'admin-block',
+                customerName: 'BLOKOVANÉ',
+                customerEmail: 'blocked@bookflow.sk',
+                customerPhone: '',
+                employeeId: employeeId,
+                employeeName: 'Administrátor',
+                serviceId: 'blocked',
+                serviceName: 'Blokovaný čas',
+                locationId: 'admin',
+                date: date,
+                startTime: startTime,
+                endTime: endTimeStr,
                 duration: duration,
                 price: 0,
-                status: 'confirmed', // Blocked time is auto-confirmed
                 notes: 'Administratívne blokovanie termínu',
-            };
-
-            const { data: inserted, error } = await supabase
-                .from('bookings')
-                .insert(dbBooking)
-                .select()
-                .single();
-
-            if (error) throw error;
-            return inserted;
+            });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['bookings'] });

@@ -94,6 +94,24 @@ export const BookingForm: React.FC = () => {
     }
   };
 
+  // Icon mapping helper
+  const getServiceIcon = (category: string) => {
+    switch (category) {
+      case "barber":
+        return <Scissors />;
+      case "nails":
+        return <Sparkles />;
+      case "wellness":
+        return <Users />; // Placeholder
+      case "massage":
+        return <User />; // Placeholder
+      case "cosmetics":
+        return <Sparkles />;
+      default:
+        return <Scissors />;
+    }
+  };
+
   const renderStepContent = () => {
     // Shared loading state for initial data
     if (currentStep > 0 && (isServicesLoading || isEmployeesLoading)) {
@@ -130,7 +148,7 @@ export const BookingForm: React.FC = () => {
         return (
           <div className="grid gap-md">
             <h3 className="text-xl font-bold mb-md">Vyberte si službu</h3>
-            <div className="grid grid-2 gap-md">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
               {services.map((service) => (
                 <motion.div
                   key={service.id}
@@ -149,7 +167,9 @@ export const BookingForm: React.FC = () => {
                     }`}
                   >
                     <CardContent className="flex items-center gap-md p-md">
-                      <div className="text-2xl">{service.icon}</div>
+                      <div className="text-2xl text-primary">
+                        {getServiceIcon(service.category || "general")}
+                      </div>
                       <div className="flex-1">
                         <h4 className="font-bold">{service.name}</h4>
                         <p className="text-sm text-secondary">
@@ -211,11 +231,11 @@ export const BookingForm: React.FC = () => {
                     className="absolute top-3 right-3 text-yellow-300 animate-pulse"
                   />
                 </div>
-                <div className="text-center z-10">
-                  <span className="block text-sm font-bold text-white mb-0.5">
+                <div className="text-center z-10 w-full overflow-hidden">
+                  <span className="block text-sm font-bold text-white mb-1 truncate px-1">
                     Ktokoľvek
                   </span>
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-primary-300">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-primary-300 truncate">
                     Najrýchlejší termín
                   </span>
                 </div>
@@ -264,11 +284,11 @@ export const BookingForm: React.FC = () => {
                     >
                       {!emp.avatar && emp.name.charAt(0)}
                     </div>
-                    <div className="text-center z-10 w-full">
-                      <span className="block text-sm font-bold text-white truncate px-2">
-                        {emp.name.split(" ")[0]}
+                    <div className="text-center z-10 w-full overflow-hidden">
+                      <span className="block text-sm font-bold text-white mb-1 truncate px-1">
+                        {emp.name}
                       </span>
-                      <span className="block text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-0.5">
+                      <span className="block text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
                         Stylist
                       </span>
                     </div>
@@ -448,7 +468,7 @@ export const BookingForm: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full" data-testid="booking-form">
       {/* Liquid Progress Indicator */}
       <div className="mb-2xl relative pt-6">
         <div className="absolute top-0 left-0 w-full h-1.5 bg-white/5 rounded-full overflow-hidden">

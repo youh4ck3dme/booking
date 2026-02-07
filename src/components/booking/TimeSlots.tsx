@@ -87,9 +87,9 @@ export const TimeSlots: React.FC<TimeSlotsProps> = ({
                 </h4>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {groupSlots.map((slot) => (
+                {groupSlots.map((slot, index) => (
                   <motion.button
-                    key={slot.id}
+                    key={`${label}-${slot.id}-${index}`}
                     variants={item}
                     onClick={() => slot.isAvailable && onSelectSlot(slot.id)}
                     disabled={!slot.isAvailable}

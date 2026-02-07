@@ -43,6 +43,7 @@ class BookFlow_Services
             'has_archive' => false,
             'hierarchical' => false,
             'menu_icon' => 'dashicons-scissors',
+            'show_in_rest' => true,
         );
         register_post_type('bf_service', $args);
     }

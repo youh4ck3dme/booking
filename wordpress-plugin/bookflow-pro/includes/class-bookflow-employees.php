@@ -41,6 +41,7 @@ class BookFlow_Employees
             'has_archive' => false,
             'hierarchical' => false,
             'menu_icon' => 'dashicons-businessman',
+            'show_in_rest' => true,
         );
         register_post_type('bf_employee', $args);
     }

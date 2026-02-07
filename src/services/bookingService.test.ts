@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { bookingService } from './bookingService';
-import { supabase } from '../lib/supabase';
 import { addDays, format } from 'date-fns';
 import type { Employee, Service } from '../types';
 
@@ -12,6 +11,22 @@ vi.mock('../lib/supabase', () => ({
                     neq: vi.fn(() => ({
                         data: [],
                         error: null
+                    })),
+                    gte: vi.fn(() => ({
+                        lte: vi.fn(() => ({
+                            neq: vi.fn(() => ({
+                                data: [],
+                                error: null
+                            }))
+                        }))
+                    }))
+                })),
+                gte: vi.fn(() => ({
+                    lte: vi.fn(() => ({
+                        neq: vi.fn(() => ({
+                            data: [],
+                            error: null
+                        }))
                     }))
                 }))
             }))
@@ -63,9 +78,6 @@ describe('bookingService', () => {
 
         const slots = await bookingService.getAvailableSlots(testDate, mockService, mockEmployees);
 
-        // 09:00 to 17:00 = 8 hours
-        // 8 hours / 30 mins = 16 slots
-        // Actually we step by 30 mins, but the loop ends when slotEnd > workEnd
         expect(slots.length).toBeGreaterThan(0);
         expect(slots[0].startTime.getHours()).toBe(9);
         expect(slots[0].isAvailable).toBe(true);
@@ -77,23 +89,38 @@ describe('bookingService', () => {
             testDate = addDays(testDate, 1);
         }
 
-        // Mock a booking at 10:00
-        vi.mocked(supabase.from).mockReturnValue({
-            select: vi.fn(() => ({
-                eq: vi.fn(() => ({
-                    neq: vi.fn(() => ({
-                        data: [{
-                            employee_id: 'e1',
-                            start_time: '10:00',
-                            end_time: '10:30',
-                            status: 'confirmed'
-                        }],
+        // Create a conflicting booking mock response from Supabase
+        const conflictBooking = {
+            id: 'b-conflict',
+            employee_id: 'e1',
+            start_time: new Date(testDate.setHours(10, 0, 0, 0)).toISOString(),
+            end_time: new Date(testDate.setHours(10, 30, 0, 0)).toISOString(),
+            status: 'confirmed',
+            price: 20
+        };
+
+        // Update the mock to return this booking
+        const { supabase } = await import('../lib/supabase');
+        
+        // We need to carefully mock the chain: .from().select().gte().lte().neq()
+        // The current top-level mock returns empty list by default.
+        // We override the implementation for this test.
+        
+        const mockSelect = vi.fn().mockImplementation(() => ({
+            gte: vi.fn().mockImplementation(() => ({
+                lte: vi.fn().mockImplementation(() => ({
+                    neq: vi.fn().mockReturnValue({
+                        data: [conflictBooking],
                         error: null
-                    }))
+                    })
                 }))
             }))
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any);
+        }));
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from as any).mockImplementation(() => ({
+            select: mockSelect
+        }));
 
         const slots = await bookingService.getAvailableSlots(testDate, mockService, mockEmployees);
 

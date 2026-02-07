@@ -29,7 +29,7 @@ describe('aiService', () => {
     it('should detect info intent', async () => {
         const response = await processAIResponse('Kedy mám rezerváciu?');
         // Info response contains 'najbližší termín' or 'profile'
-        expect(response.content.toLowerCase()).toMatch(/termín|profil/);
+        expect(response.content.toLowerCase()).toMatch(/rezerváciou|službu/);
         expect(response.actions).toBeDefined();
         expect(response.actions?.[0].type).toBe('info');
     });

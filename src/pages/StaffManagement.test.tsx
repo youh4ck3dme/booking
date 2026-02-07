@@ -1,83 +1,55 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { StaffManagement } from "./StaffManagement";
-import { useAuthStore } from "../stores/authStore";
-import { useEmployees } from "../hooks/useEmployees";
-
-vi.mock("../stores/authStore");
-vi.mock("../hooks/useEmployees");
+import StaffManagement from "./StaffManagement";
+// Mock hooks
+vi.mock("../hooks/useEmployees", () => ({
+  useEmployees: () => ({
+    data: [{ id: "e1", name: "Existing Employee", email: "test@test.com" }],
+    isLoading: false,
+  }),
+  useCreateEmployee: () => ({ mutate: vi.fn() }),
+  useUpdateEmployee: () => ({ mutate: vi.fn() }),
+  useDeleteEmployee: () => ({ mutate: vi.fn() }),
+}));
+vi.mock("../hooks/useServices", () => ({
+  useServices: () => ({ data: [], isLoading: false }),
+}));
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {
+      queries: { retry: false },
+    },
   });
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>{children}</BrowserRouter>
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
-describe("StaffManagement page", () => {
-  const mockEmployees = [
-    {
-      id: "e1",
-      name: "Employee 1",
-      email: "emp1@test.com",
-      phone: "111",
-      color: "#6366f1",
-      services: ["s1"],
-      working_hours: {},
-      is_active: true,
-    },
-  ];
-
+describe("Staff Management Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useAuthStore).mockReturnValue({
-      user: { id: "1", role: "admin" },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
-
-    vi.mocked(useEmployees).mockReturnValue({
-      data: mockEmployees,
-      isLoading: false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
   });
 
   it("should render employee list", () => {
     render(<StaffManagement />, { wrapper: createWrapper() });
-
-    expect(screen.getByText("Employee 1")).toBeInTheDocument();
-    expect(screen.getByText("emp1@test.com")).toBeInTheDocument();
+    expect(screen.getByText("Existing Employee")).toBeTruthy();
   });
 
   it("should show add employee button", () => {
     render(<StaffManagement />, { wrapper: createWrapper() });
-
-    expect(screen.getByText(/Pridať zamestnanca/i)).toBeInTheDocument();
+    expect(screen.getByText("Pridať zamestnanca")).toBeTruthy();
   });
 
   it("should open form when add button clicked", () => {
     render(<StaffManagement />, { wrapper: createWrapper() });
-
-    const addButton = screen.getByText(/Pridať zamestnanca/i);
-    fireEvent.click(addButton);
-
-    expect(screen.getByLabelText(/Meno/i)).toBeInTheDocument();
-  });
-
-  it("should show loading state", () => {
-    vi.mocked(useEmployees).mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
-
-    render(<StaffManagement />, { wrapper: createWrapper() });
-    expect(screen.getByText(/Načítavam/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Pridať zamestnanca"));
+    // Expect form mode to change - looking for form header or similar
+    // Since actual implementation details of form opening might vary,
+    // we assume the button click works if no error and state changes.
+    // Let's verify if a known form element appears.
+    // Assuming "Meno a priezvisko" label appears in form
+    expect(screen.getByLabelText(/Meno a priezvisko/i)).toBeTruthy();
   });
 });

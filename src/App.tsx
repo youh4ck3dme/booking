@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import { Header } from "./components/layout/Header";
 import { Sidebar } from "./components/layout/Sidebar";
 import { BottomNav } from "./components/layout/BottomNav";
@@ -8,6 +9,7 @@ import { OfflineBanner } from "./components/pwa/OfflineBanner";
 import { InstallPrompt } from "./components/pwa/InstallPrompt";
 import { ChatWidget } from "./components/chat/ChatWidget";
 import { useAuthStore } from "./stores/authStore";
+import { SEO } from "./components/SEO";
 
 // Lazy Load Pages
 const Home = React.lazy(() =>
@@ -69,78 +71,96 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 };
 
 function App() {
-  return (
-    <BrowserRouter>
-      <div className="app">
-        <Header />
-        <main className="app-main">
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/book" element={<Book />} />
-              <Route
-                path="/my-bookings"
-                element={
-                  <ProtectedRoute>
-                    <MyBookings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/staff"
-                element={
-                  <ProtectedRoute>
-                    <StaffManagement />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/statistics"
-                element={
-                  <ProtectedRoute>
-                    <Statistics />
-                  </ProtectedRoute>
-                }
-              />
+  const location = useLocation();
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </main>
-        <BottomNav />
-        <ChatWidget />
-        <Sidebar />
-        <ToastContainer />
-        <OfflineBanner />
-        <InstallPrompt />
-      </div>
-    </BrowserRouter>
+  return (
+    <div className="app">
+      <SEO 
+        title="BookFlow Pro - Premium Booking" 
+        description="Rezervujte si váš termín rýchlo a bezpečne."
+      />
+      <Header />
+      <main className="app-main">
+        <Suspense fallback={<PageLoader />}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <Routes location={location}>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/book" element={<Book />} />
+                <Route
+                  path="/my-bookings"
+                  element={
+                    <ProtectedRoute>
+                      <MyBookings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/staff"
+                  element={
+                    <ProtectedRoute>
+                      <StaffManagement />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/statistics"
+                  element={
+                    <ProtectedRoute>
+                      <Statistics />
+                    </ProtectedRoute>
+                  }
+                />
+
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
+        </Suspense>
+      </main>
+      <BottomNav />
+      <ChatWidget />
+      <Sidebar />
+      <ToastContainer />
+      <OfflineBanner />
+      <InstallPrompt />
+    </div>
   );
 }
 
-export default App;
+const Root = () => (
+    <App />
+);
+
+export default Root;

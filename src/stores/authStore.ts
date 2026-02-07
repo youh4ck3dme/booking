@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User, AuthState } from '../types';
-import { supabase, isDemoMode } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 interface AuthStore extends AuthState {
     login: (email: string, password: string) => Promise<boolean>;
     register: (name: string, email: string, password: string) => Promise<boolean>;
-    logout: () => void;
+    logout: () => Promise<void>;
     updateUser: (user: Partial<User>) => Promise<void>;
+    initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -18,111 +19,104 @@ export const useAuthStore = create<AuthStore>()(
             isAuthenticated: false,
             isLoading: false,
 
-            login: async (email, password) => {
-                set({ isLoading: true });
+            initialize: async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    // Fetch profile if exists
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single();
 
-                // MOCK LOGIN BACKDOOR (Always active for tests & demo)
-                // This ensures E2E tests pass and demo users work even without backend
-                if (password === 'admin123' || password === 'emp123' || password === 'cust123' || password === 'demo123') {
-                    await new Promise(resolve => setTimeout(resolve, 800)); // Fake delay
-
-                    const mockUser: User = {
-                        id: 'mock-user-id',
-                        email: email,
-                        name: email.includes('admin') ? 'Admin User' : (email.includes('employee') ? 'Ján Zamestnanec' : 'Ján Novák'),
-                        role: email.includes('admin') ? 'admin' : (email.includes('employee') ? 'employee' : 'customer'),
-                        createdAt: new Date(),
+                    const user: User = {
+                        id: session.user.id,
+                        email: session.user.email || '',
+                        name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
+                        role: profile?.role || 'customer',
+                        createdAt: new Date(session.user.created_at),
                     };
 
-                    set({
-                        user: mockUser,
-                        token: 'mock-jwt-token',
-                        isAuthenticated: true,
-                        isLoading: false,
-                    });
-                    return true;
+                    set({ user, token: session.access_token, isAuthenticated: true });
                 }
 
-                try {
-                    const { data, error } = await supabase.auth.signInWithPassword({
-                        email,
-                        password,
-                    });
-
-                    if (error) throw error;
-
-                    if (data.session) {
-                        // Fetch extended profile data including role
-                        const { data: profile } = await supabase
+                // Listen for auth changes
+                supabase.auth.onAuthStateChange(async (_event, session) => {
+                    if (session?.user) {
+                         const { data: profile } = await supabase
                             .from('profiles')
                             .select('*')
-                            .eq('id', data.user.id)
+                            .eq('id', session.user.id)
                             .single();
-
+                            
                         const user: User = {
-                            id: data.user.id,
-                            email: data.user.email || '',
-                            name: profile?.full_name || data.user.user_metadata.full_name || email.split('@')[0],
+                            id: session.user.id,
+                            email: session.user.email || '',
+                            name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
                             role: profile?.role || 'customer',
-                            phone: profile?.phone,
-                            createdAt: new Date(data.user.created_at),
+                            createdAt: new Date(session.user.created_at),
                         };
-
-                        set({
-                            user,
-                            token: data.session.access_token,
-                            isAuthenticated: true,
-                            isLoading: false,
-                        });
-                        return true;
+                        set({ user, token: session.access_token, isAuthenticated: true });
+                    } else {
+                        set({ user: null, token: null, isAuthenticated: false });
                     }
-                } catch (error) {
+                });
+            },
+
+            login: async (email, password) => {
+                set({ isLoading: true });
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
                     console.error('Login error:', error);
+                    set({ isLoading: false });
+                    return false;
+                }
+
+                if (data.user) {
+                    // Profile will be handled by the listener or we can fetch it here
+                    // For now, let's rely on listener or just return true and let state update
                 }
 
                 set({ isLoading: false });
-                return false;
+                return true;
             },
 
             register: async (name, email, password) => {
                 set({ isLoading: true });
-                try {
-                    const { data, error } = await supabase.auth.signUp({
-                        email,
-                        password,
-                        options: {
-                            data: {
-                                full_name: name,
-                                role: 'customer', // Default role
-                            },
-                        },
-                    });
-
-                    if (error) throw error;
-
-                    if (data.user && data.session) {
-                        const user: User = {
-                            id: data.user.id,
-                            email: data.user.email || '',
-                            name: name,
-                            role: 'customer',
-                            createdAt: new Date(data.user.created_at),
-                        };
-
-                        set({
-                            user,
-                            token: data.session.access_token,
-                            isAuthenticated: true,
-                            isLoading: false,
-                        });
-                        return true;
+                
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: name,
+                        }
                     }
-                } catch (error) {
-                    console.error('Registration error:', error);
+                });
+
+                if (error) {
+                    console.error('Register error:', error);
+                    set({ isLoading: false });
+                    return false;
+                }
+                
+                // Note: user might need to confirm email if configured in Supabase
+                if (data.user) {
+                    // Create profile entry
+                    await supabase.from('profiles').insert({
+                        id: data.user.id,
+                        full_name: name,
+                        email: email,
+                        role: 'customer'
+                    });
                 }
 
                 set({ isLoading: false });
-                return false;
+                return true;
             },
 
             logout: async () => {
@@ -137,23 +131,13 @@ export const useAuthStore = create<AuthStore>()(
             updateUser: async (updates) => {
                 const { user } = get();
                 if (!user) return;
-
-                try {
-                    const { error } = await supabase
-                        .from('profiles')
-                        .update({
-                            full_name: updates.name,
-                            phone: updates.phone,
-                            // role is generally not updatable by user themselves in this context, but kept for interface/profile updates
-                        })
-                        .eq('id', user.id);
-
-                    if (!error) {
-                        set({ user: { ...user, ...updates } });
-                    }
-                } catch (err) {
-                    console.error('Update user error:', err);
+                
+                // Update profile in DB
+                if (updates.name) {
+                     await supabase.from('profiles').update({ full_name: updates.name }).eq('id', user.id);
                 }
+                
+                set({ user: { ...user, ...updates } });
             },
         }),
         {
@@ -166,16 +150,3 @@ export const useAuthStore = create<AuthStore>()(
         }
     )
 );
-
-// Initialize auth listener to keep state in sync
-if (!isDemoMode) {
-    supabase.auth.onAuthStateChange(async (event, session) => {
-        if (event === 'SIGNED_OUT') {
-            useAuthStore.getState().logout();
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-            if (session) {
-                // Optional: reload user profile here to ensure role/data is fresh
-            }
-        }
-    });
-}
