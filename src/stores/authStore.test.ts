@@ -36,7 +36,7 @@ vi.mock('../lib/supabase', () => ({
 }));
 
 describe('useAuthStore (Supabase)', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         vi.clearAllMocks();
         // Reset store state
         useAuthStore.setState({ 
@@ -45,6 +45,8 @@ describe('useAuthStore (Supabase)', () => {
             isAuthenticated: false, 
             isLoading: false 
         });
+        // Initialize store to set up listeners
+        await useAuthStore.getState().initialize();
     });
 
     it('should login successfully', async () => {
